@@ -1,8 +1,8 @@
+import type { FastifyPluginAsync } from 'fastify'
 import fp from 'fastify-plugin'
-import { FastifyPluginAsync } from 'fastify'
 
-const rateLimitPlugin: FastifyPluginAsync = async (fastify, opts) => {
-// TODO
+const rateLimitPlugin: FastifyPluginAsync = async () => {
+  // TODO
 }
 
 export default fp(rateLimitPlugin)

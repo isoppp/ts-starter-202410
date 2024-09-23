@@ -1,7 +1,7 @@
 import { TraceExporter } from '@google-cloud/opentelemetry-cloud-trace-exporter'
 import { FastifyInstrumentation } from '@opentelemetry/instrumentation-fastify'
-import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino'
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
+import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino'
 import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston'
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import p from '@prisma/instrumentation'

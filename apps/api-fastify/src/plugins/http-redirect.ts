@@ -1,6 +1,6 @@
+import type { FastifyPluginAsync } from 'fastify'
 // plugins/httpsRedirect.ts
 import fp from 'fastify-plugin'
-import { FastifyPluginAsync } from 'fastify'
 
 const httpsRedirectPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.addHook('onRequest', (request, reply, done) => {
