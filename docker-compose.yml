@@ -1,0 +1,27 @@
+version: '3.7'
+services:
+  db:
+    image: postgres:16
+    container_name: isoppp-remix-starter-dev
+    restart: always
+    ports:
+      - '5455:5432'
+    env_file:
+      - .env.local
+    volumes:
+      - db:/var/lib/mysql
+  db-test:
+    image: postgres:16
+    container_name: isoppp-remix-starter-test
+    restart: always
+    ports:
+      - '5456:5432'
+    env_file:
+      - .env.test
+    volumes:
+      - db-test:/var/lib/postgresql/data
+volumes:
+  db:
+    name: isoppp-remix-starter
+  db-test:
+    name: isoppp-remix-starter-test

@@ -1,0 +1,7 @@
+{
+  // import this config
+  extends: ['github>isoppp/renovate-config'],
+
+  // enable specific managers(recommend)
+  enabledManagers: ['npm', 'github-actions'],
+}
