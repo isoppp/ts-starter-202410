@@ -1,5 +1,4 @@
 import { env } from '@/lib/env'
-import { useNonce } from '@/lib/nonce'
 import { trpc } from '@/lib/trpcClient'
 import type { HeadersFunction } from '@remix-run/node'
 import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
@@ -16,8 +15,6 @@ export const headers: HeadersFunction = ({ loaderHeaders }) => {
 }
 
 export function Layout({ children }: { children: ReactNode }) {
-  const nonce = useNonce()
-
   return (
     <html lang='en'>
       <head>
@@ -41,8 +38,8 @@ export function Layout({ children }: { children: ReactNode }) {
           ))}
         </header>
         {children}
-        <ScrollRestoration nonce={nonce} />
-        <Scripts nonce={nonce} />
+        <ScrollRestoration />
+        <Scripts />
       </body>
     </html>
   )
