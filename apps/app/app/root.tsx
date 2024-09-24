@@ -1,3 +1,4 @@
+import { env } from '@/lib/env'
 import { useNonce } from '@/lib/nonce'
 import { trpc } from '@/lib/trpcClient'
 import type { HeadersFunction } from '@remix-run/node'
@@ -51,7 +52,7 @@ const queryClient = new QueryClient()
 const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
-      url: '/api/trpc',
+      url: `${env.API_BASE_URL}/api/trpc`,
       // async headers() {
       //   return {
       //     authorization: getAuthCookie(),

@@ -1,9 +1,17 @@
-import { getAuthSessionId } from '@/feature/auth/cookie-session/auth-session'
 import { env } from '@/lib/env'
 import { prisma } from '@/lib/prisma'
 import { TRPCError, initTRPC } from '@trpc/server'
 
-export async function createTestContext() {
+// TODO
+const getAuthSessionId = async () => null
+
+type TestContext = {
+  req: Request
+  resHeaders: Headers
+  user: null
+}
+
+export async function createTestContext(): Promise<TestContext> {
   return {
     req: new Request('http://localhost:3000'),
     resHeaders: new Headers(),
@@ -15,7 +23,7 @@ export function createLoaderContext({
   req,
 }: {
   req: Request
-}) {
+}): TestContext {
   return { req, resHeaders: new Headers(), user: null }
 }
 
@@ -26,7 +34,7 @@ export async function createContext({
   req: Request
   resHeaders: Headers
 }) {
-  const sessionId = await getAuthSessionId(req)
+  const sessionId = await getAuthSessionId()
   if (sessionId) {
     const sessionData = await prisma.session.findUnique({ where: { id: sessionId }, select: { id: true, user: true } })
     if (sessionData?.user) {

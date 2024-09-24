@@ -1,8 +1,3 @@
-import { AUTH_SESSION_EXPIRATION_SEC, commitAuthSessionWithValue } from '@/feature/auth/cookie-session/auth-session'
-import {
-  destroyStrVerificationSession,
-  getVerificationSessionEmail,
-} from '@/feature/auth/cookie-session/verification-session'
 import { prisma } from '@/lib/prisma'
 import type { Context } from '@/trpc/trpc'
 import { TRPCError } from '@trpc/server'
@@ -26,7 +21,9 @@ type UseCaseResult =
       attemptExceeded: boolean
     }
 export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Promise<UseCaseResult> => {
-  const email = await getVerificationSessionEmail(ctx.req)
+  // TODO
+  // const email = await getVerificationSessionEmail(ctx.req)
+  const email = 'test@example.com'
   if (!email) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
@@ -85,7 +82,7 @@ export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
 
     const createdSession = await prisma.session.create({
       data: {
-        expiresAt: addSeconds(new Date(), AUTH_SESSION_EXPIRATION_SEC),
+        expiresAt: addSeconds(new Date(), 60 * 60 * 24 * 30), // TODO
         userId: createdUser.id,
       },
     })
@@ -98,7 +95,8 @@ export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
 
   if (!txResult.ok) return { ok: false, attemptExceeded: !!txResult.attemptExceeded }
 
-  ctx.resHeaders.append('Set-Cookie', await commitAuthSessionWithValue(ctx.req, txResult.sessionId))
-  ctx.resHeaders.append('Set-Cookie', await destroyStrVerificationSession(ctx.req))
+  // TODO
+  // ctx.resHeaders.append('Set-Cookie', await commitAuthSessionWithValue(ctx.req, txResult.sessionId))
+  // ctx.resHeaders.append('Set-Cookie', await destroyStrVerificationSession(ctx.req))
   return { ok: true }
 }

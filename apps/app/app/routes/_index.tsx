@@ -1,24 +1,12 @@
 import { Badge } from '@/components/ui/badge'
 import { trpc } from '@/lib/trpcClient'
-import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-import { createTrpcServerForLoader } from '../../../api-hono/src/trpc'
+import type { MetaFunction } from '@remix-run/node'
 
 export const meta: MetaFunction = () => {
   return [{ title: 'New Remix App' }, { name: 'description', content: 'Welcome to Remix!' }]
 }
 
-export const loader = async (ctx: LoaderFunctionArgs) => {
-  const trpcServer = createTrpcServerForLoader(ctx.request)
-  const message = await trpcServer.example.hello()
-  return {
-    message,
-  }
-}
-
 export default function Index() {
-  const data = useLoaderData<typeof loader>()
-
   const utils = trpc.useUtils()
   const queryResult = trpc.example.list.useQuery()
   const mutation = trpc.example.create.useMutation({
@@ -43,7 +31,6 @@ export default function Index() {
       <div>
         <Badge>badge test</Badge>
       </div>
-      <div>ssr: {data.message}</div>
       <div>
         <button type='button' onClick={fetchExamples}>
           refetch

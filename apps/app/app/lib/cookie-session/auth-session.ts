@@ -10,7 +10,7 @@ const authSessionStorage = createCookieSessionStorage({
     path: '/',
     httpOnly: true,
     maxAge: AUTH_SESSION_EXPIRATION_SEC, // sec
-    secrets: env.SESSION_SECRET.split(','),
+    secrets: [process.env.SESSION_SECRET ?? ''],
     secure: true,
   },
 })

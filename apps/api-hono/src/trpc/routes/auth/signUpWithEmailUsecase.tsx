@@ -1,4 +1,3 @@
-import { commitVerificationSessionWithValue } from '@/feature/auth/cookie-session/verification-session'
 import SignUpVerification from '@/feature/email/components/SignUpVerification'
 import { prisma } from '@/lib/prisma'
 import type { Context } from '@/trpc/trpc'
@@ -50,6 +49,7 @@ export const signUpWithEmailUsecase = async ({ ctx, input }: UseCaseArgs): Promi
   // Don't send any detailed message for security.
   if (!txRes.ok) return { ok: true }
 
-  ctx.resHeaders.append('Set-Cookie', await commitVerificationSessionWithValue(ctx.req, input.email))
+  // TODO
+  // ctx.resHeaders.append('Set-Cookie', await commitVerificationSessionWithValue(ctx.req, input.email))
   return { ok: true }
 }

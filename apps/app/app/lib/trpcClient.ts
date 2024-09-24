@@ -1,4 +1,3 @@
 import { createTRPCReact } from '@trpc/react-query'
-import type { AppRouter } from '../../../api-hono/src/trpc'
-
+import type { AppRouter } from '../../types/trpc'
 export const trpc = createTRPCReact<AppRouter>()

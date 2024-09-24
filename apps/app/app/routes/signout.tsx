@@ -1,6 +1,5 @@
+import { destroyStrAuthSession, getAuthSessionId } from '@/lib/cookie-session/auth-session'
 import { type LoaderFunctionArgs, type MetaFunction, redirect } from '@remix-run/node'
-import { destroyStrAuthSession, getAuthSessionId } from '../../../api-hono/src/feature/auth/cookie-session/auth-session'
-import { prisma } from '../../../api-hono/src/lib/prisma'
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Logout' }, { name: 'description', content: 'Logout' }]
@@ -12,7 +11,9 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
     return redirect('/signin')
   }
 
-  const existing = await prisma.session.findUnique({ where: { id: sessionId } })
+  // TODO
+  // const existing = await prisma.session.findUnique({ where: { id: sessionId } })
+  const existing = true
   if (!existing) {
     return redirect('/signin', {
       headers: {

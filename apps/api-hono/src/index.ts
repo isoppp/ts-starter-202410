@@ -2,7 +2,7 @@ import { factory } from '@/lib/hono'
 import { generalRateLimit } from '@/middlewares/general-rate-limit'
 import { httpRedirect } from '@/middlewares/http-redirect'
 import { requestSpan } from '@/middlewares/request-span'
-import { appRouter } from '@/trpc'
+import { authRouter } from '@/trpc/routes/auth'
 import { serve } from '@hono/node-server'
 import { trpcServer } from '@hono/trpc-server'
 import { compress } from 'hono/compress'
@@ -36,7 +36,7 @@ const newApp = () => {
   app.use(
     '/api/trpc/*',
     trpcServer({
-      router: appRouter,
+      router: authRouter,
     }),
   )
 
