@@ -1,7 +1,7 @@
 import { env } from '@/lib/env'
 import { trpc } from '@/lib/trpcClient'
 import type { HeadersFunction } from '@remix-run/node'
-import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
+import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration, json, useLoaderData } from '@remix-run/react'
 import './tailwind.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { httpBatchLink } from '@trpc/client'
@@ -12,6 +12,14 @@ export const headers: HeadersFunction = ({ loaderHeaders }) => {
     'Server-Timing': loaderHeaders.get('Server-Timing') ?? '',
   }
   return headers
+}
+
+export async function loader() {
+  return json({
+    ENV: {
+      API_BASE_URL: env.API_BASE_URL,
+    },
+  })
 }
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -46,20 +54,22 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 const queryClient = new QueryClient()
-const trpcClient = trpc.createClient({
-  links: [
-    httpBatchLink({
-      url: `${env.API_BASE_URL}/api/trpc`,
-      // async headers() {
-      //   return {
-      //     authorization: getAuthCookie(),
-      //   };
-      // },
-    }),
-  ],
-})
 
 export default function App() {
+  const loaderData = useLoaderData<typeof loader>()
+  const trpcClient = trpc.createClient({
+    links: [
+      httpBatchLink({
+        url: `${loaderData.ENV.API_BASE_URL}/api/trpc`,
+        // async headers() {
+        //   return {
+        //     authorization: getAuthCookie(),
+        //   };
+        // },
+      }),
+    ],
+  })
+
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
