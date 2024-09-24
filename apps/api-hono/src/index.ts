@@ -2,7 +2,9 @@ import { factory } from '@/lib/hono'
 import { generalRateLimit } from '@/middlewares/general-rate-limit'
 import { httpRedirect } from '@/middlewares/http-redirect'
 import { requestSpan } from '@/middlewares/request-span'
+import { appRouter } from '@/trpc'
 import { serve } from '@hono/node-server'
+import { trpcServer } from '@hono/trpc-server'
 import { compress } from 'hono/compress'
 import { cors } from 'hono/cors'
 import { logger as requestLogger } from 'hono/logger'
@@ -10,7 +12,6 @@ import { requestId } from 'hono/request-id'
 import { secureHeaders } from 'hono/secure-headers'
 import { logger } from './lib/logger'
 import { initOpenTelemetry } from './lib/open-telemetry'
-
 initOpenTelemetry()
 
 const newApp = () => {
@@ -31,6 +32,13 @@ const newApp = () => {
   app.get('/', (c) => {
     return c.text('Hello Hono!')
   })
+
+  app.use(
+    '/api/trpc/*',
+    trpcServer({
+      router: appRouter,
+    }),
+  )
 
   return app
 }

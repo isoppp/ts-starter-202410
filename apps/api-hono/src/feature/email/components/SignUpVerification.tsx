@@ -1,4 +1,4 @@
-import { generateRandomURLString } from '@/.server/utils/auth'
+import { generateRandomURLString } from '@/utils/auth'
 import {
   Body,
   Button,
@@ -13,7 +13,6 @@ import {
   Section,
   Text,
 } from '@react-email/components'
-import type { FC } from 'react'
 
 const baseUrl = 'http://localhost:3000'
 const serviceName = '@isoppp/remix-starter'
@@ -21,7 +20,7 @@ const serviceName = '@isoppp/remix-starter'
 type Props = {
   pathname: string
 }
-export const SignUpVerification: FC<Props> = ({ pathname = `/signup/${generateRandomURLString()}` }) => {
+export const SignUpVerification = ({ pathname = `/signup/${generateRandomURLString()}` }: Props) => {
   const href = baseUrl + pathname
   return (
     <Html>

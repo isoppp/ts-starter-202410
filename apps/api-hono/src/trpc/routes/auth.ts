@@ -1,15 +1,9 @@
-import { isSignedInUseCase } from '@/.server/trpc/routes/auth/isSignedIn'
-import {
-  signInVerificationSchema,
-  signInVerificationUsecase,
-} from '@/.server/trpc/routes/auth/signInVerficaitionUsecase'
-import { signInWithEmailSchema, signInWithEmailUsecase } from '@/.server/trpc/routes/auth/signInWithEmailUsecase'
-import {
-  signUpVerificationSchema,
-  signUpVerificationUsecase,
-} from '@/.server/trpc/routes/auth/signUpVerficaitionUsecase'
-import { signUpWithEmailSchema, signUpWithEmailUsecase } from '@/.server/trpc/routes/auth/signUpWithEmailUsecase'
-import { createTRPCRouter, p } from '@/.server/trpc/trpc'
+import { isSignedInUseCase } from '@/trpc/routes/auth/isSignedIn'
+import { signInVerificationSchema, signInVerificationUsecase } from '@/trpc/routes/auth/signInVerficaitionUsecase'
+import { signInWithEmailSchema, signInWithEmailUsecase } from '@/trpc/routes/auth/signInWithEmailUsecase'
+import { signUpVerificationSchema, signUpVerificationUsecase } from '@/trpc/routes/auth/signUpVerficaitionUsecase'
+import { signUpWithEmailSchema, signUpWithEmailUsecase } from '@/trpc/routes/auth/signUpWithEmailUsecase'
+import { createTRPCRouter, p } from '@/trpc/trpc'
 import * as v from 'valibot'
 
 export const authRouter = createTRPCRouter({

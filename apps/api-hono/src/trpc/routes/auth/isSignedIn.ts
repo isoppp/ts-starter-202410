@@ -1,6 +1,6 @@
-import { destroyStrAuthSession, getAuthSessionId } from '@/.server/cookie-session/auth-session'
-import type { Context } from '@/.server/trpc/trpc'
+import { destroyStrAuthSession, getAuthSessionId } from '@/feature/auth/cookie-session/auth-session'
 import { prisma } from '@/lib/prisma'
+import type { Context } from '@/trpc/trpc'
 import { isBefore } from 'date-fns'
 
 type UseCaseArgs = {

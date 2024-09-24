@@ -1,10 +1,10 @@
-import { AUTH_SESSION_EXPIRATION_SEC, commitAuthSessionWithValue } from '@/.server/cookie-session/auth-session'
+import { AUTH_SESSION_EXPIRATION_SEC, commitAuthSessionWithValue } from '@/feature/auth/cookie-session/auth-session'
 import {
   destroyStrVerificationSession,
   getVerificationSessionEmail,
-} from '@/.server/cookie-session/verification-session'
-import type { Context } from '@/.server/trpc/trpc'
+} from '@/feature/auth/cookie-session/verification-session'
 import { prisma } from '@/lib/prisma'
+import type { Context } from '@/trpc/trpc'
 import { addSeconds, isBefore } from 'date-fns'
 import * as v from 'valibot'
 

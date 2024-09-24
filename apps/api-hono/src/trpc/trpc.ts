@@ -1,4 +1,4 @@
-import { getAuthSessionId } from '@/.server/cookie-session/auth-session'
+import { getAuthSessionId } from '@/feature/auth/cookie-session/auth-session'
 import { env } from '@/lib/env'
 import { prisma } from '@/lib/prisma'
 import { TRPCError, initTRPC } from '@trpc/server'
