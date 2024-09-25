@@ -1,4 +1,4 @@
-import SignInVerification from '@/feature/email/components/SignInVerification'
+import SignInVerification from '@/infrastructure/email/templates/SignInVerification'
 import { prisma } from '@/lib/prisma'
 import type { Context } from '@/trpc/trpc'
 import { generateRandomURLString } from '@/utils/auth'

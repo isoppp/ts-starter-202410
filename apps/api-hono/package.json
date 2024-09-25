@@ -2,7 +2,7 @@
   "name": "@repo/api-hono",
   "scripts": {
     "dev": "dotenv -e .env.local -- tsx watch src/index.ts",
-    "dev-email": "dotenv -e .env.local -- email dev --dir ./srcfeature/email/components",
+    "dev-email": "dotenv -e .env.local -- email dev --dir ./src/infrastructure/email/templates",
     "export-type": "tsup",
     "migrate": "dotenv -e .env.local -- prisma migrate dev",
     "migrate:reset": "dotenv -e .env.local -- prisma migrate reset",
