@@ -61,6 +61,12 @@ export default function App() {
     links: [
       httpBatchLink({
         url: `${loaderData.ENV.API_BASE_URL}/api/trpc`,
+        fetch(url, options) {
+          return fetch(url, {
+            ...options,
+            credentials: 'include',
+          })
+        },
         // async headers() {
         //   return {
         //     authorization: getAuthCookie(),

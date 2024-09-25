@@ -1,9 +1,11 @@
 import { env } from '@/lib/env'
 import { prisma } from '@/lib/prisma'
-import { TRPCError, initTRPC } from '@trpc/server'
+import type { User } from '@prisma/client'
 
-// TODO
-const getAuthSessionId = async () => null
+import type { EnvHono } from '@/types/hono-context'
+import { TRPCError, initTRPC } from '@trpc/server'
+import type { FetchCreateContextFnOptions } from '@trpc/server/adapters/fetch'
+import type { Context as HonoContext } from 'hono'
 
 type TestContext = {
   req: Request
@@ -27,22 +29,19 @@ export function createLoaderContext({
   return { req, resHeaders: new Headers(), user: null }
 }
 
-export async function createContext({
-  req,
-  resHeaders,
-}: {
-  req: Request
-  resHeaders: Headers
-}) {
-  const sessionId = await getAuthSessionId()
-  if (sessionId) {
-    const sessionData = await prisma.session.findUnique({ where: { id: sessionId }, select: { id: true, user: true } })
-    if (sessionData?.user) {
-      return { req, resHeaders, user: sessionData.user }
-    }
+export async function createContext(opts: FetchCreateContextFnOptions, c: HonoContext<EnvHono>) {
+  const session = c.get('session')
+  const setSessionValue = c.get('setSessionValue')
+  let user: User | null = null
+  if (session.sessionId) {
+    const sessionData = await prisma.session.findUnique({
+      where: { id: session.sessionId },
+      select: { id: true, user: true },
+    })
+    user = sessionData?.user ?? null
   }
 
-  return { req, resHeaders, user: null }
+  return { ...opts, session, setSessionValue, user }
 }
 
 export type Context = Awaited<ReturnType<typeof createContext>>

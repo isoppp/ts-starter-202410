@@ -1,9 +1,11 @@
+import { env } from '@/lib/env'
 import { factory } from '@/lib/hono'
 import { cookieSession } from '@/middlewares/cookie-session'
 import { generalRateLimit } from '@/middlewares/general-rate-limit'
 import { httpRedirect } from '@/middlewares/http-redirect'
 import { requestSpan } from '@/middlewares/request-span'
 import { appRouter } from '@/trpc'
+import { createContext } from '@/trpc/trpc'
 import { serve } from '@hono/node-server'
 import { trpcServer } from '@hono/trpc-server'
 import { compress } from 'hono/compress'
@@ -27,11 +29,30 @@ const newApp = () => {
   app.use(cookieSession)
   app.use(requestId())
   app.use(generalRateLimit)
-  app.use(cors())
+  app.use(
+    cors({
+      origin: env.WEBAPP_URL,
+      credentials: true,
+    }),
+  )
   app.use(secureHeaders({ removePoweredBy: true }))
   app.use(compress())
 
   app.get('/', (c) => {
+    return c.text('Hello Hono!')
+  })
+
+  app.get('/a', (c) => {
+    const session = c.get('session')
+    c.set('session', {
+      ...session,
+      verificationEmail: '123',
+    })
+    c.get('setSessionValue')('verificationEmail', '1240')
+    c.get('setSessionValue')('verificationEmail', '1245')
+    return c.text('Set value to session')
+  })
+  app.get('/b', (c) => {
     return c.text('Hello Hono!')
   })
 
@@ -40,6 +61,7 @@ const newApp = () => {
     trpcServer({
       endpoint: '/api/trpc',
       router: appRouter,
+      createContext,
     }),
   )
 
@@ -47,9 +69,8 @@ const newApp = () => {
 }
 
 const app = newApp()
-const port = 3033
-logger.info(`Server is running on port ${port}`)
+logger.info(`Server is running on port ${env.PORT}`)
 serve({
   fetch: app.fetch,
-  port,
+  port: env.PORT,
 })

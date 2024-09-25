@@ -7,8 +7,7 @@ type UseCaseArgs = {
 }
 
 export const isSignedInUseCase = async ({ ctx }: UseCaseArgs): Promise<{ ok: boolean }> => {
-  // const sessionId = await getAuthSessionId(ctx.req)
-  const sessionId = null
+  const sessionId = ctx.session.sessionId
   if (!sessionId) {
     return { ok: false } // Don't throw error
   }
@@ -20,7 +19,7 @@ export const isSignedInUseCase = async ({ ctx }: UseCaseArgs): Promise<{ ok: boo
   })
 
   if (!row || isBefore(row?.expiresAt, new Date())) {
-    // ctx.resHeaders.append('Set-Cookie', await destroyStrAuthSession(ctx.req))
+    ctx.setSessionValue('sessionId', null)
     return { ok: false }
   }
   return { ok: true }

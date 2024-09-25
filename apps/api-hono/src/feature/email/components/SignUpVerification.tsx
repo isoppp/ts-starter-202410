@@ -1,3 +1,4 @@
+import { env } from '@/lib/env'
 import { generateRandomURLString } from '@/utils/auth'
 import {
   Body,
@@ -14,7 +15,7 @@ import {
   Text,
 } from '@react-email/components'
 
-const baseUrl = 'http://localhost:3000'
+const baseUrl = env.WEBAPP_URL
 const serviceName = '@isoppp/remix-starter'
 
 type Props = {

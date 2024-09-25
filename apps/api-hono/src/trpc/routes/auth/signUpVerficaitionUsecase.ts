@@ -29,9 +29,7 @@ type TxResult =
       attemptExceeded: boolean
     }
 export const signUpVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Promise<UseCaseResult> => {
-  // TODO
-  // const email = await getVerificationSessionEmail(ctx.req)
-  const email = 'test@example.com'
+  const email = ctx.session.verificationEmail
   if (!email) {
     return { ok: false, attemptExceeded: false }
   }
@@ -110,7 +108,7 @@ export const signUpVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
 
   if (!txRes.ok) return txRes
 
-  // ctx.resHeaders.append('Set-Cookie', await commitAuthSessionWithValue(ctx.req, txRes.sessionId))
-  // ctx.resHeaders.append('Set-Cookie', await destroyStrVerificationSession(ctx.req))
+  ctx.setSessionValue('sessionId', txRes.sessionId ?? null)
+  ctx.setSessionValue('verificationEmail', null)
   return { ok: true }
 }

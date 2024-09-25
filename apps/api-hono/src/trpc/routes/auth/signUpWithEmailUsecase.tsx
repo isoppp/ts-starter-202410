@@ -49,7 +49,6 @@ export const signUpWithEmailUsecase = async ({ ctx, input }: UseCaseArgs): Promi
   // Don't send any detailed message for security.
   if (!txRes.ok) return { ok: true }
 
-  // TODO
-  // ctx.resHeaders.append('Set-Cookie', await commitVerificationSessionWithValue(ctx.req, input.email))
+  ctx.setSessionValue('verificationEmail', input.email)
   return { ok: true }
 }
