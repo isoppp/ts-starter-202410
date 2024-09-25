@@ -1,4 +1,5 @@
 import { factory } from '@/lib/hono'
+import { cookieSession } from '@/middlewares/cookie-session'
 import { generalRateLimit } from '@/middlewares/general-rate-limit'
 import { httpRedirect } from '@/middlewares/http-redirect'
 import { requestSpan } from '@/middlewares/request-span'
@@ -23,6 +24,7 @@ const newApp = () => {
     }),
   )
   app.use(httpRedirect)
+  app.use(cookieSession)
   app.use(requestId())
   app.use(generalRateLimit)
   app.use(cors())
