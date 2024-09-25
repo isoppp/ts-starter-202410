@@ -6,44 +6,43 @@ import type { EnvHono } from '@/types/hono-context'
 import type { Context } from 'hono'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 
-const cookieName = env.APP_ENV === 'local' ? '_session' : '__Host-session'
-export const SESSION_EXPIRATION_SEC = 60 * 60 * 24 * 90 // 90 days
+const cookieName = env.APP_ENV === 'local' ? '_verification' : '__Host-verification'
 
-export const parseSessionId = (c: Context<EnvHono>): { hasCookie: boolean; sessionId: string | null } => {
+export const parseVerification = (c: Context<EnvHono>): { hasCookie: boolean; verificationEmail: string | null } => {
   const sessionCookie = getCookie(c, cookieName)
   const hasCookie = !!sessionCookie
 
-  if (!sessionCookie) return { hasCookie, sessionId: null }
+  if (!sessionCookie) return { hasCookie, verificationEmail: null }
 
   try {
     const unsignedSessionId = unsign<string>(sessionCookie, env.SESSION_SECRET)
-    return { hasCookie, sessionId: unsignedSessionId }
+    return { hasCookie, verificationEmail: unsignedSessionId }
   } catch (e) {
-    logger.error('Failed to unsign session cookie:', e)
+    logger.error('Failed to unsign verification cookie:', e)
   }
-  return { hasCookie, sessionId: null }
+  return { hasCookie, verificationEmail: null }
 }
 
-export const cookieSession = factory.createMiddleware(async (c, next) => {
-  const { hasCookie, sessionId } = parseSessionId(c)
-  c.set('sessionId', sessionId)
+export const cookieEmailVerification = factory.createMiddleware(async (c, next) => {
+  const { hasCookie, verificationEmail } = parseVerification(c)
+  c.set('verificationEmail', verificationEmail)
 
   await next()
 
-  const newValue = c.get('sessionId')
+  const newValue = c.get('verificationEmail')
 
   if (hasCookie && !newValue) {
     deleteCookie(c, cookieName)
     return
   }
 
-  if (newValue !== sessionId) {
+  if (newValue !== verificationEmail) {
     const newSessionCookie = sign(newValue, env.SESSION_SECRET)
     setCookie(c, cookieName, newSessionCookie, {
       httpOnly: true,
       secure: env.APP_ENV !== 'local',
       sameSite: 'Lax',
-      maxAge: 60 * 60 * 24 * 90, // 90 days
+      maxAge: 60 * 60, // 1 hour
     })
     return
   }

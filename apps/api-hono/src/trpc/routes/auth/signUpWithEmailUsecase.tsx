@@ -29,7 +29,7 @@ export const signUpWithEmailUsecase = async ({ ctx, input }: UseCaseArgs): Promi
 
     const created = await prisma.verification.create({
       data: {
-        type: 'email',
+        type: 'EMAIL_SIGN_UP',
         token: generateRandomURLString(128),
         expiresAt: addMinutes(new Date(), 5),
         to: input.email,
@@ -49,6 +49,6 @@ export const signUpWithEmailUsecase = async ({ ctx, input }: UseCaseArgs): Promi
   // Don't send any detailed message for security.
   if (!txRes.ok) return { ok: true }
 
-  ctx.setSessionValue('verificationEmail', input.email)
+  ctx.setVerificationEmail(input.email)
   return { ok: true }
 }

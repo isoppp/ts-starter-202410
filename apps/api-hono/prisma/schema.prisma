@@ -44,21 +44,21 @@ model Session {
 }
 
 enum VerificationType {
-  EMAIL
-  PHONE
+  EMAIL_SIGN_UP
+  EMAIL_SIGN_IN
 }
 
 model Verification {
-  id        String    @id @default(cuid())
-  type      String
+  id        String           @id @default(cuid())
+  type      VerificationType
   to        String
-  token     String    @unique @db.VarChar(128)
+  token     String           @unique @db.VarChar(128)
   expiresAt DateTime
   usedAt    DateTime?
-  attempt   Int       @default(0)
+  attempt   Int              @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([to, token])
+  @@index([to, token, type])
 }

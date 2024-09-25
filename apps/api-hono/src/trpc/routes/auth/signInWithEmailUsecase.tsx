@@ -27,6 +27,7 @@ export const signInWithEmailUsecase = async ({ ctx, input }: UseCaseArgs): Promi
     const hasValidVerification = await prisma.verification.findFirst({
       where: {
         to: input.email,
+        type: 'EMAIL_SIGN_IN',
         expiresAt: {
           gte: new Date(),
         },
@@ -45,7 +46,7 @@ export const signInWithEmailUsecase = async ({ ctx, input }: UseCaseArgs): Promi
 
     const created = await prisma.verification.create({
       data: {
-        type: 'email',
+        type: 'EMAIL_SIGN_IN',
         token: generateRandomURLString(128),
         expiresAt: addMinutes(new Date(), 5),
         to: input.email,
@@ -63,6 +64,6 @@ export const signInWithEmailUsecase = async ({ ctx, input }: UseCaseArgs): Promi
 
   if (!txRes.ok) return { ok: false }
 
-  ctx.setSessionValue('verificationEmail', input.email)
+  ctx.setVerificationEmail(input.email)
   return { ok: true }
 }

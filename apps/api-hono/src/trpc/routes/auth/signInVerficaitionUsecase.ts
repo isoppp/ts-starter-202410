@@ -21,7 +21,7 @@ type UseCaseResult =
       attemptExceeded: boolean
     }
 export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Promise<UseCaseResult> => {
-  const email = ctx.session.verificationEmail
+  const email = ctx.verificationEmail
   if (!email) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
@@ -34,6 +34,10 @@ export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
       where: {
         to: email,
         token: input.token,
+        type: 'EMAIL_SIGN_IN',
+        expiresAt: {
+          gte: new Date(),
+        },
       },
     })
 
@@ -93,7 +97,7 @@ export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
 
   if (!txResult.ok) return { ok: false, attemptExceeded: !!txResult.attemptExceeded }
 
-  ctx.setSessionValue('sessionId', txResult.sessionId ?? null)
-  ctx.setSessionValue('verificationEmail', null)
+  ctx.setSessionId(txResult.sessionId ?? null)
+  ctx.setVerificationEmail(null)
   return { ok: true }
 }

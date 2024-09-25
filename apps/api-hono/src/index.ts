@@ -1,5 +1,6 @@
 import { env } from '@/lib/env'
 import { factory } from '@/lib/hono'
+import { cookieEmailVerification } from '@/middlewares/cookie-email-verification'
 import { cookieSession } from '@/middlewares/cookie-session'
 import { generalRateLimit } from '@/middlewares/general-rate-limit'
 import { httpRedirect } from '@/middlewares/http-redirect'
@@ -27,6 +28,7 @@ const newApp = () => {
   )
   app.use(httpRedirect)
   app.use(cookieSession)
+  app.use(cookieEmailVerification)
   app.use(requestId())
   app.use(generalRateLimit)
   app.use(
@@ -39,20 +41,6 @@ const newApp = () => {
   app.use(compress())
 
   app.get('/', (c) => {
-    return c.text('Hello Hono!')
-  })
-
-  app.get('/a', (c) => {
-    const session = c.get('session')
-    c.set('session', {
-      ...session,
-      verificationEmail: '123',
-    })
-    c.get('setSessionValue')('verificationEmail', '1240')
-    c.get('setSessionValue')('verificationEmail', '1245')
-    return c.text('Set value to session')
-  })
-  app.get('/b', (c) => {
     return c.text('Hello Hono!')
   })
 

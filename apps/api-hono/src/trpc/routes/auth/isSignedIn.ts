@@ -7,7 +7,7 @@ type UseCaseArgs = {
 }
 
 export const isSignedInUseCase = async ({ ctx }: UseCaseArgs): Promise<{ ok: boolean }> => {
-  const sessionId = ctx.session.sessionId
+  const sessionId = ctx.sessionId
   if (!sessionId) {
     return { ok: false } // Don't throw error
   }
@@ -19,7 +19,7 @@ export const isSignedInUseCase = async ({ ctx }: UseCaseArgs): Promise<{ ok: boo
   })
 
   if (!row || isBefore(row?.expiresAt, new Date())) {
-    ctx.setSessionValue('sessionId', null)
+    ctx.setSessionId(null)
     return { ok: false }
   }
   return { ok: true }

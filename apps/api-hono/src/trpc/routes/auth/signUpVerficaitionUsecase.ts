@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { SESSION_EXPIRATION_SEC } from '@/middlewares/cookie-session'
 import type { Context } from '@/trpc/trpc'
 import { addSeconds, isBefore } from 'date-fns'
 import * as v from 'valibot'
@@ -29,7 +30,7 @@ type TxResult =
       attemptExceeded: boolean
     }
 export const signUpVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Promise<UseCaseResult> => {
-  const email = ctx.session.verificationEmail
+  const email = ctx.verificationEmail
   if (!email) {
     return { ok: false, attemptExceeded: false }
   }
@@ -39,6 +40,10 @@ export const signUpVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
       where: {
         to: email,
         token: input.token,
+        type: 'EMAIL_SIGN_UP',
+        expiresAt: {
+          gte: new Date(),
+        },
       },
     })
 
@@ -95,7 +100,7 @@ export const signUpVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
 
     const createdSession = await prisma.session.create({
       data: {
-        expiresAt: addSeconds(new Date(), 60 * 60 * 24 * 30), // TODO
+        expiresAt: addSeconds(new Date(), SESSION_EXPIRATION_SEC),
         userId: createdUser.id,
       },
     })
@@ -108,7 +113,7 @@ export const signUpVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
 
   if (!txRes.ok) return txRes
 
-  ctx.setSessionValue('sessionId', txRes.sessionId ?? null)
-  ctx.setSessionValue('verificationEmail', null)
+  ctx.setSessionId(txRes.sessionId ?? null)
+  ctx.setVerificationEmail(null)
   return { ok: true }
 }

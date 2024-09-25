@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "VerificationType" AS ENUM ('EMAIL', 'PHONE');
+CREATE TYPE "VerificationType" AS ENUM ('EMAIL_SIGN_UP', 'EMAIL_SIGN_IN');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -25,7 +25,7 @@ CREATE TABLE "Session" (
 -- CreateTable
 CREATE TABLE "Verification" (
     "id" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
+    "type" "VerificationType" NOT NULL,
     "to" TEXT NOT NULL,
     "token" VARCHAR(128) NOT NULL,
     "expiresAt" TIMESTAMP(3) NOT NULL,
@@ -47,7 +47,7 @@ CREATE INDEX "Session_userId_idx" ON "Session"("userId");
 CREATE UNIQUE INDEX "Verification_token_key" ON "Verification"("token");
 
 -- CreateIndex
-CREATE INDEX "Verification_to_token_idx" ON "Verification"("to", "token");
+CREATE INDEX "Verification_to_token_type_idx" ON "Verification"("to", "token", "type");
 
 -- AddForeignKey
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
