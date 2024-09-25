@@ -67,11 +67,6 @@ export default function App() {
             credentials: 'include',
           })
         },
-        // async headers() {
-        //   return {
-        //     authorization: getAuthCookie(),
-        //   };
-        // },
       }),
     ],
   })

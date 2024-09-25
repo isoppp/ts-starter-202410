@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { SESSION_EXPIRATION_SEC } from '@/middlewares/cookie-session'
 import type { Context } from '@/trpc/trpc'
 import { TRPCError } from '@trpc/server'
 import { addSeconds } from 'date-fns'
@@ -84,7 +85,7 @@ export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
 
     const createdSession = await prisma.session.create({
       data: {
-        expiresAt: addSeconds(new Date(), 60 * 60 * 24 * 30), // TODO
+        expiresAt: addSeconds(new Date(), SESSION_EXPIRATION_SEC),
         userId: createdUser.id,
       },
     })
