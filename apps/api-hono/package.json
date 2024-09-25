@@ -3,8 +3,7 @@
   "scripts": {
     "dev": "dotenv -e .env.local -- tsx watch src/index.ts",
     "dev-email": "dotenv -e .env.local -- email dev --dir ./srcfeature/email/components",
-    "export-type": "dotenv -e .env.local -- tsc --project tsconfig.export.json",
-    "export-type2": "tsc src/trpc/index.type.ts --declaration --emitDeclarationOnly --outDir ./types",
+    "export-type": "tsup",
     "migrate": "dotenv -e .env.local -- prisma migrate dev",
     "migrate:reset": "dotenv -e .env.local -- prisma migrate reset",
     "prisma:studio": "dotenv -e .env.development -- prisma studio",

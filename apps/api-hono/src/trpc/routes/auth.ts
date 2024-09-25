@@ -1,4 +1,3 @@
-import { isSignedInUseCase } from '@/trpc/routes/auth/isSignedIn'
 import { signInVerificationSchema, signInVerificationUsecase } from '@/trpc/routes/auth/signInVerficaitionUsecase'
 import { signInWithEmailSchema, signInWithEmailUsecase } from '@/trpc/routes/auth/signInWithEmailUsecase'
 import { signUpVerificationSchema, signUpVerificationUsecase } from '@/trpc/routes/auth/signUpVerficaitionUsecase'
@@ -7,9 +6,12 @@ import { createTRPCRouter, p } from '@/trpc/trpc'
 import * as v from 'valibot'
 
 export const authRouter = createTRPCRouter({
-  isSignedIn: p.auth.query(async (args) => {
-    const result = await isSignedInUseCase(args)
-    return { isSignedIn: result.ok }
+  signOut: p.public.mutation(async (args) => {
+    args.ctx.setSessionId(null)
+    return { ok: true }
+  }),
+  isSignedIn: p.public.query(async (args) => {
+    return { isSignedIn: !!args.ctx.sessionId }
   }),
   signupWithEmail: p.public.input(v.parser(signUpWithEmailSchema)).mutation(async (args) => {
     const result = await signUpWithEmailUsecase(args)

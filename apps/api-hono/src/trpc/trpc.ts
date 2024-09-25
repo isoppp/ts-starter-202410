@@ -31,18 +31,26 @@ export function createLoaderContext({
 }
 
 export async function createContext(_: FetchCreateContextFnOptions, c: HonoContext<EnvHono>) {
-  const sessionId = c.get('sessionId')
-  const verificationEmail = c.get('verificationEmail')
+  let sessionId = c.get('sessionId')
   let userId: string | null = null
   if (sessionId) {
-    const sessionData = await prisma.session.findUnique({
+    const sessionData = await prisma.session.findFirst({
       where: { id: sessionId },
       select: { id: true, user: true },
     })
     userId = sessionData?.user?.id ?? null
+
+    // expire session if not found
+    if (!sessionData) {
+      c.set('sessionId', null)
+      sessionId = null
+      userId = null
+    }
   }
 
   const setSessionId = (id: string | null) => c.set('sessionId', id)
+
+  const verificationEmail = c.get('verificationEmail')
   const setVerificationEmail = (email: string | null) => c.set('verificationEmail', email)
 
   return { userId, sessionId, setSessionId, verificationEmail, setVerificationEmail }
@@ -64,7 +72,7 @@ export const t = initTRPC.context<Context>().create({
 })
 
 const authed = t.middleware(async ({ ctx, next }) => {
-  if (!ctx.user) {
+  if (!ctx.userId) {
     throw new TRPCError({ code: 'UNAUTHORIZED' })
   }
 
@@ -73,7 +81,7 @@ const authed = t.middleware(async ({ ctx, next }) => {
   })
 })
 const unauthed = t.middleware(async ({ ctx, next }) => {
-  if (ctx.user) {
+  if (ctx.userId) {
     throw new TRPCError({ code: 'FORBIDDEN' })
   }
 

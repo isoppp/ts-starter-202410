@@ -22,7 +22,6 @@ export default function Signup() {
       email: 'test@example.com',
     },
   })
-
   const mutation = trpc.auth.signupWithEmail.useMutation({
     onSuccess: async () => {
       console.log('success')

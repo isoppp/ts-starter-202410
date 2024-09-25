@@ -3,18 +3,11 @@ import * as _trpc_server_unstable_core_do_not_import from '@trpc/server/unstable
 
 declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<{
     ctx: {
-        req: Request;
-        resHeaders: Headers;
-        user: {
-            id: string;
-            email: string;
-            createdAt: Date;
-            updatedAt: Date;
-        };
-    } | {
-        req: Request;
-        resHeaders: Headers;
-        user: null;
+        userId: string | null;
+        sessionId: string | null;
+        setSessionId: (id: string | null) => void;
+        verificationEmail: string | null;
+        setVerificationEmail: (email: string | null) => void;
     };
     meta: object;
     errorShape: {
@@ -31,18 +24,11 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<{
 }, _trpc_server_unstable_core_do_not_import.DecorateCreateRouterOptions<{
     example: _trpc_server_unstable_core_do_not_import.BuiltRouter<{
         ctx: {
-            req: Request;
-            resHeaders: Headers;
-            user: {
-                id: string;
-                email: string;
-                createdAt: Date;
-                updatedAt: Date;
-            };
-        } | {
-            req: Request;
-            resHeaders: Headers;
-            user: null;
+            userId: string | null;
+            sessionId: string | null;
+            setSessionId: (id: string | null) => void;
+            verificationEmail: string | null;
+            setVerificationEmail: (email: string | null) => void;
         };
         meta: object;
         errorShape: {
@@ -80,18 +66,11 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<{
     }>;
     auth: _trpc_server_unstable_core_do_not_import.BuiltRouter<{
         ctx: {
-            req: Request;
-            resHeaders: Headers;
-            user: {
-                id: string;
-                email: string;
-                createdAt: Date;
-                updatedAt: Date;
-            };
-        } | {
-            req: Request;
-            resHeaders: Headers;
-            user: null;
+            userId: string | null;
+            sessionId: string | null;
+            setSessionId: (id: string | null) => void;
+            verificationEmail: string | null;
+            setVerificationEmail: (email: string | null) => void;
         };
         meta: object;
         errorShape: {
@@ -106,6 +85,12 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<{
         };
         transformer: false;
     }, {
+        signOut: _trpc_server.TRPCMutationProcedure<{
+            input: void;
+            output: {
+                ok: boolean;
+            };
+        }>;
         isSignedIn: _trpc_server.TRPCQueryProcedure<{
             input: void;
             output: {
