@@ -1,33 +1,24 @@
-import { destroyStrAuthSession, getAuthSessionId } from '@/.server/cookie-session/auth-session'
-import { prisma } from '@/lib/prisma'
-import { type LoaderFunctionArgs, type MetaFunction, redirect } from '@remix-run/node'
+import { trpc } from '@/lib/trpcClient'
+import type { MetaFunction } from '@remix-run/node'
+import { useNavigate } from '@remix-run/react'
+import { useEffect } from 'react'
 
 export const meta: MetaFunction = () => {
-  return [{ title: 'Logout' }, { name: 'description', content: 'Logout' }]
-}
-
-export const loader = async (ctx: LoaderFunctionArgs) => {
-  const sessionId = await getAuthSessionId(ctx.request)
-  if (!sessionId) {
-    return redirect('/signin')
-  }
-
-  const existing = await prisma.session.findUnique({ where: { id: sessionId } })
-  if (!existing) {
-    return redirect('/signin', {
-      headers: {
-        'Set-Cookie': await destroyStrAuthSession(ctx.request),
-      },
-    })
-  }
-
-  return redirect('/signin', {
-    headers: {
-      'Set-Cookie': await destroyStrAuthSession(ctx.request),
-    },
-  })
+  return [{ title: 'Signout' }, { name: 'description', content: 'Signout' }]
 }
 
 export default function Signout() {
-  return <div>loading...</div>
+  const navigate = useNavigate()
+  const mutation = trpc.auth.signOut.useMutation()
+  const utils = trpc.useUtils()
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    ;(async () => {
+      const res = await mutation.mutateAsync()
+      await utils.invalidate()
+      if (res.ok) navigate('/signin')
+    })()
+  }, [])
+  return <div>loading... TODO: check unauthorized</div>
 }

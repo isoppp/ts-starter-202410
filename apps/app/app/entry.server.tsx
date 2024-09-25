@@ -5,7 +5,7 @@
  */
 
 import { PassThrough } from 'node:stream'
-import { NonceProvider } from '@/lib/nonce'
+
 import type { AppLoadContext, EntryContext } from '@remix-run/node'
 import { createReadableStreamFromReadable } from '@remix-run/node'
 import { RemixServer } from '@remix-run/react'
@@ -21,13 +21,11 @@ export default function handleRequest(
   remixContext: EntryContext,
   // This is ignored so we can keep it in the template for visibility.  Feel
   // free to delete this parameter in your app if you're not using it!
-  // biome-ignore lint/correctness/noUnusedVariables: ↑
-  loadContext: AppLoadContext,
+  _: AppLoadContext,
 ) {
-  const nonce = loadContext.cspNonce?.toString() ?? ''
   return isbot(request.headers.get('user-agent') || '')
-    ? handleBotRequest(request, responseStatusCode, responseHeaders, remixContext, nonce)
-    : handleBrowserRequest(request, responseStatusCode, responseHeaders, remixContext, nonce)
+    ? handleBotRequest(request, responseStatusCode, responseHeaders, remixContext)
+    : handleBrowserRequest(request, responseStatusCode, responseHeaders, remixContext)
 }
 
 function handleBotRequest(
@@ -35,16 +33,12 @@ function handleBotRequest(
   responseStatusCode: number,
   responseHeaders: Headers,
   remixContext: EntryContext,
-  nonce: string,
 ) {
   return new Promise((resolve, reject) => {
     let shellRendered = false
     const { pipe, abort } = renderToPipeableStream(
-      <NonceProvider value={nonce}>
-        <RemixServer context={remixContext} url={request.url} abortDelay={ABORT_DELAY} nonce={nonce} />
-      </NonceProvider>,
+      <RemixServer context={remixContext} url={request.url} abortDelay={ABORT_DELAY} />,
       {
-        nonce,
         onAllReady() {
           shellRendered = true
           const body = new PassThrough()
@@ -65,7 +59,6 @@ function handleBotRequest(
           reject(error)
         },
         onError(error: unknown) {
-          // biome-ignore lint/style/noParameterAssign: I'm not sure how to avoid this so far
           responseStatusCode = 500
           // Log streaming rendering errors from inside the shell.  Don't log
           // errors encountered during initial shell rendering since they'll
@@ -86,16 +79,12 @@ function handleBrowserRequest(
   responseStatusCode: number,
   responseHeaders: Headers,
   remixContext: EntryContext,
-  nonce: string,
 ) {
   return new Promise((resolve, reject) => {
     let shellRendered = false
     const { pipe, abort } = renderToPipeableStream(
-      <NonceProvider value={nonce}>
-        <RemixServer context={remixContext} url={request.url} abortDelay={ABORT_DELAY} nonce={nonce} />
-      </NonceProvider>,
+      <RemixServer context={remixContext} url={request.url} abortDelay={ABORT_DELAY} />,
       {
-        nonce,
         onShellReady() {
           shellRendered = true
           const body = new PassThrough()
@@ -116,7 +105,6 @@ function handleBrowserRequest(
           reject(error)
         },
         onError(error: unknown) {
-          // biome-ignore lint/style/noParameterAssign: I'm not sure how to avoid this so far
           responseStatusCode = 500
           // Log streaming rendering errors from inside the shell.  Don't log
           // errors encountered during initial shell rendering since they'll

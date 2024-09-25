@@ -1,8 +1,14 @@
+import { env } from '@/lib/env'
 import { factory } from '@/lib/hono'
+import { cookieEmailVerification } from '@/middlewares/cookie-email-verification'
+import { cookieSession } from '@/middlewares/cookie-session'
 import { generalRateLimit } from '@/middlewares/general-rate-limit'
 import { httpRedirect } from '@/middlewares/http-redirect'
 import { requestSpan } from '@/middlewares/request-span'
+import { appRouter } from '@/trpc'
+import { createContext } from '@/trpc/trpc'
 import { serve } from '@hono/node-server'
+import { trpcServer } from '@hono/trpc-server'
 import { compress } from 'hono/compress'
 import { cors } from 'hono/cors'
 import { logger as requestLogger } from 'hono/logger'
@@ -10,7 +16,6 @@ import { requestId } from 'hono/request-id'
 import { secureHeaders } from 'hono/secure-headers'
 import { logger } from './lib/logger'
 import { initOpenTelemetry } from './lib/open-telemetry'
-
 initOpenTelemetry()
 
 const newApp = () => {
@@ -22,9 +27,16 @@ const newApp = () => {
     }),
   )
   app.use(httpRedirect)
+  app.use(cookieSession)
+  app.use(cookieEmailVerification)
   app.use(requestId())
   app.use(generalRateLimit)
-  app.use(cors())
+  app.use(
+    cors({
+      origin: env.WEBAPP_URL,
+      credentials: true,
+    }),
+  )
   app.use(secureHeaders({ removePoweredBy: true }))
   app.use(compress())
 
@@ -32,13 +44,21 @@ const newApp = () => {
     return c.text('Hello Hono!')
   })
 
+  app.use(
+    '/api/trpc/*',
+    trpcServer({
+      endpoint: '/api/trpc',
+      router: appRouter,
+      createContext,
+    }),
+  )
+
   return app
 }
 
 const app = newApp()
-const port = 3033
-logger.info(`Server is running on port ${port}`)
+logger.info(`Server is running on port ${env.PORT}`)
 serve({
   fetch: app.fetch,
-  port,
+  port: env.PORT,
 })

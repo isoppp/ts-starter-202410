@@ -8,7 +8,7 @@ export const requestSpan = factory.createMiddleware(async (c, next) => {
   const pathname = url.pathname
   const info = getConnInfo(c)
 
-  await tracer.startActiveSpan(`${c.req.method} ${pathname}`, async (span: Span) => {
+  await tracer.startActiveSpan(`${c.req.method} ${pathname}`, async (span) => {
     // request info
     span.setAttribute('http.method', c.req.method)
     span.setAttribute('http.url', c.req.url)
