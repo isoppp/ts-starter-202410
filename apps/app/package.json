@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "dotenv -e .env.local -- remix vite:dev",
     "build": "dotenv -e .env.production -- remix vite:build",
-    "start": "dotenv -e .env.production -- remix-serve ./build/server/index.js",
+    "deploy-cf": "dotenv -e .env.production -- npm run build && wrangler pages deploy",
+    "preview": "npm run build && wrangler pages dev",
     "lint": "eslint .",
     "check": "pnpm biome check",
     "lint-fix": "pnpm lint --fix && pnpm check --write",
@@ -23,10 +24,9 @@
     "@prisma/client": "5.19.1",
     "@prisma/instrumentation": "5.19.1",
     "@radix-ui/react-icons": "1.3.0",
-    "@remix-run/express": "2.11.2",
-    "@remix-run/node": "2.11.2",
-    "@remix-run/react": "2.11.2",
-    "@remix-run/serve": "2.11.2",
+    "@remix-run/cloudflare": "2.12.1",
+    "@remix-run/cloudflare-pages": "2.12.1",
+    "@remix-run/react": "2.12.1",
     "@tanstack/react-query": "5.55.0",
     "@trpc/client": "11.0.0-rc.502",
     "@trpc/react-query": "11.0.0-rc.502",
@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
+    "@cloudflare/workers-types": "4.20240925.0",
     "@remix-run/dev": "2.11.2",
     "@remix-run/testing": "2.12.0",
     "@storybook/addon-essentials": "8.2.9",
@@ -83,7 +84,8 @@
     "typescript": "5.5.4",
     "vite": "5.4.6",
     "vite-tsconfig-paths": "5.0.1",
-    "vitest": "2.0.5"
+    "vitest": "2.0.5",
+    "wrangler": "3.78.11"
   },
   "engines": {
     "node": "22"

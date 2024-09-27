@@ -1,5 +1,5 @@
 import { trpc } from '@/lib/trpcClient'
-import type { MetaFunction } from '@remix-run/node'
+import type { MetaFunction } from '@remix-run/cloudflare'
 import { useNavigate, useParams } from '@remix-run/react'
 import type { FormEventHandler } from 'react'
 

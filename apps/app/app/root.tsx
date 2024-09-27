@@ -1,25 +1,17 @@
-import { env } from '@/lib/env'
 import { trpc } from '@/lib/trpcClient'
-import type { HeadersFunction } from '@remix-run/node'
-import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration, json, useLoaderData } from '@remix-run/react'
+import type { LoaderFunction } from '@remix-run/cloudflare'
+import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react'
 import './tailwind.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { httpBatchLink } from '@trpc/client'
 import type { ReactNode } from 'react'
 
-export const headers: HeadersFunction = ({ loaderHeaders }) => {
-  const headers = {
-    'Server-Timing': loaderHeaders.get('Server-Timing') ?? '',
-  }
-  return headers
-}
-
-export async function loader() {
-  return json({
+export const loader: LoaderFunction = ({ context }) => {
+  return {
     ENV: {
-      API_BASE_URL: env.API_BASE_URL,
+      API_BASE_URL: context.cloudflare.env.API_BASE_URL,
     },
-  })
+  }
 }
 
 export function Layout({ children }: { children: ReactNode }) {

@@ -1,6 +1,6 @@
 import { trpc } from '@/lib/trpcClient'
 import { vineResolver } from '@hookform/resolvers/vine'
-import type { MetaFunction } from '@remix-run/node'
+import type { MetaFunction } from '@remix-run/cloudflare'
 import vine from '@vinejs/vine'
 import type { Infer } from '@vinejs/vine/types'
 import { useCallback } from 'react'
@@ -9,13 +9,13 @@ import { useForm } from 'react-hook-form'
 const schema = vine.object({
   email: vine.string().email(),
 })
-const validator = vine.compile(schema)
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Login' }, { name: 'description', content: 'Login' }]
 }
 
 export default function Signin() {
+  const validator = vine.compile(schema)
   const form = useForm({
     resolver: vineResolver(validator),
     defaultValues: {
