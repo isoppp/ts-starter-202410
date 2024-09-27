@@ -1,6 +1,7 @@
 {
   "name": "@repo/api-hono",
   "scripts": {
+    "start": "dotenv -e .env.production -- bash -c 'echo $DATABASE_URL && npx prisma migrate deploy && tsx src/index.ts'",
     "dev": "run-p dev:* export-type",
     "dev:server": "dotenv -e .env.local -- tsx watch src/index.ts",
     "dev-email": "dotenv -e .env.local -- email dev --dir ./src/infrastructure/email/templates",
