@@ -34,6 +34,19 @@ const newApp = () => {
   app.use(
     cors({
       origin: env.WEBAPP_URL,
+      allowHeaders: [
+        'Content-Type', // Specify the format of the data
+        // 'Authorization', // Authentication information (if needed)
+        'Accept', // Indicate the response format the client accepts
+        'Origin', // Indicate the origin of the CORS request
+        'Cookie', // Cookie information (sent from frontend)
+        'Set-Cookie', // Set cookies (sent from server)
+        'Cache-Control', // Control caching strategy
+        'Referer', // Referrer information
+        'Content-Length', // Specify the size of the payload
+        'Accept-Language', // For multi-language support
+      ],
+      allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       credentials: true,
     }),
   )
