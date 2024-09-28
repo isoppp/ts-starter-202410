@@ -3,7 +3,7 @@ import winston from 'winston'
 // Imports the Google Cloud client library for Winston
 import { LoggingWinston } from '@google-cloud/logging-winston'
 
-const pinoLikeFormat = winston.format.printf(({ level, message, timestamp, ...metadata }) => {
+const pinoLikeFormat = winston.format.printf(({ level, message, timestamp }) => {
   const pid = process.pid
   const formattedMessage = `[${timestamp}] ${level.toUpperCase()} (${pid}): ${message}`
   return formattedMessage

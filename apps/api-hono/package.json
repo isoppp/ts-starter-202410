@@ -11,6 +11,8 @@
     "prisma:studio": "dotenv -e .env.development -- prisma studio",
     "seed": "dotenv -e .env.local -- tsx prisma/seed/index.ts",
     "postinstall": "prisma generate",
+    "lint": "biome check",
+    "lint-fix": "biome check --write --unsafe",
     "typecheck": "tsc"
   },
   "dependencies": {

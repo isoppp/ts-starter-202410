@@ -36,10 +36,8 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: generate prisma client
         run: pnpm --filter apps/api-hono prisma generate
-      - name: eslint
+      - name: eslint and biome check
         run: pnpm lint
-      - name: biome
-        run: pnpm check
       - name: tsc
         run: pnpm typecheck
       - name: test
