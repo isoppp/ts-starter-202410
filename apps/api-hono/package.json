@@ -1,5 +1,6 @@
 {
   "name": "@repo/api-hono",
+  "type": "module",
   "scripts": {
     "start": "echo $DATABASE_URL && npx prisma migrate deploy && tsx src/index.ts",
     "dev": "run-p dev:* export-type",
@@ -13,7 +14,8 @@
     "postinstall": "prisma generate",
     "lint": "biome check",
     "lint-fix": "biome check --write --unsafe",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "test": "dotenv -e .env.test -- prisma migrate reset --force --skip-seed && dotenv -e .env.test -- vitest"
   },
   "dependencies": {
     "@google-cloud/error-reporting": "3.0.5",
@@ -48,6 +50,8 @@
     "npm-run-all": "4.1.5",
     "tsup": "8.3.0",
     "typescript": "5.6.2",
+    "vite": "5.4.6",
+    "vite-tsconfig-paths": "5.0.1",
     "vitest": "2.0.5"
   }
 }
