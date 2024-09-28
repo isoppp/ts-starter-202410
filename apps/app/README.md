@@ -11,7 +11,6 @@
 - [x] Postgres through docker compose
 - [x] Prisma
 - [x] Valibot for schema validation
-- [x] Vinejs for frontend validation
 - [x] tRPC with test example which uses DB
 - [x] React Query
 - [x] vitest ( .n. prefix runs on node env, .b. prefix runs on browser env)

@@ -150,9 +150,6 @@ importers:
       '@trpc/react-query':
         specifier: 11.0.0-rc.502
         version: 11.0.0-rc.502(@tanstack/react-query@5.55.0(react@18.3.1))(@trpc/client@11.0.0-rc.502(@trpc/server@11.0.0-rc.502))(@trpc/server@11.0.0-rc.502)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@vinejs/vine':
-        specifier: 2.1.0
-        version: 2.1.0
       class-variance-authority:
         specifier: 0.7.0
         version: 0.7.0
@@ -2266,10 +2263,6 @@ packages:
   '@polka/url@1.0.0-next.28':
     resolution: {integrity: sha512-8LduaNlMZGwdZ6qWrKlfa+2M4gahzFkprZiAt2TF8uS0qQgBizKXpXURqvTJ4WtmupWxaLqjRb2UCTe72mu+Aw==}
 
-  '@poppinss/macroable@1.0.3':
-    resolution: {integrity: sha512-B4iV6QxW//Fn17+qF1EMZRmoThIUJlCtcO85yoRDJnMyHeAthjz4ig9OTkfGGXKtQhcdPX0me75gU5K9J897+w==}
-    engines: {node: '>=18.16.0'}
-
   '@prisma/client@5.19.1':
     resolution: {integrity: sha512-x30GFguInsgt+4z5I4WbkZP2CGpotJMUXy+Gl/aaUjHn2o1DnLYNTA+q9XdYmAQZM8fIIkvUiA2NpgosM3fneg==}
     engines: {node: '>=16.13'}
@@ -3191,9 +3184,6 @@ packages:
   '@types/uuid@9.0.8':
     resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
 
-  '@types/validator@13.12.2':
-    resolution: {integrity: sha512-6SlHBzUW8Jhf3liqrGGXyTJSIFe4nqlJ5A5KaMZ2l/vbM3Wh3KSybots/wfWVzNLK4D1NZluDlSQIbIEPx6oyA==}
-
   '@types/wrap-ansi@3.0.0':
     resolution: {integrity: sha512-ltIpx+kM7g/MLRZfkbL7EsCEjfzCcScLpkg37eXEtx5kmrAKBkTJwd1GIAjDSL8wTpM6Hzn5YO4pSb91BEwu1g==}
 
@@ -3242,14 +3232,6 @@ packages:
 
   '@vanilla-extract/private@1.0.6':
     resolution: {integrity: sha512-ytsG/JLweEjw7DBuZ/0JCN4WAQgM9erfSTdS1NQY778hFQSZ6cfCDEZZ0sgVm4k54uNz6ImKB33AYvSR//fjxw==}
-
-  '@vinejs/compiler@2.5.0':
-    resolution: {integrity: sha512-hg4ekaB5Y2zh+IWzBiC/WCDWrIfpVnKu/ubUvelKlidc/VbulsexoFRw5kJGHZenPVI5YzNnDeTdYSALkTV7jQ==}
-    engines: {node: '>=18.0.0'}
-
-  '@vinejs/vine@2.1.0':
-    resolution: {integrity: sha512-09aJ2OauxpblqiNqd8qC9RAzzm5SV6fTqZhE4e25j4cM7fmNoXRTjM7Oo8llFADMO4eSA44HqYEO3mkRRYdbYw==}
-    engines: {node: '>=18.16.0'}
 
   '@vitejs/plugin-react@4.3.1':
     resolution: {integrity: sha512-m/V2syj5CuVnaxcUJOQRel/Wr31FFXRFlnOoq1TVtkCxsY5veGMTEmpWHndrhB2U8ScHtCQB1e+4hWYExQc6Lg==}
@@ -5806,10 +5788,6 @@ packages:
     resolution: {integrity: sha512-bdok/XvKII3nUpklnV6P2hxtMNrCboOjAcyBuQnWEhO665FwrSNRxU+AqpsyvO6LgGYPspN+lu5CLtw4jPRKNA==}
     engines: {node: '>=0.10.0'}
 
-  normalize-url@8.0.1:
-    resolution: {integrity: sha512-IO9QvjUMWxPQQhs60oOu10CRkWCiZzSUkzbXGGV9pviYl1fXYcvkzQ5jV9z8Y6un8ARoVRl4EtC6v6jNqbaJ/w==}
-    engines: {node: '>=14.16'}
-
   npm-install-checks@6.3.0:
     resolution: {integrity: sha512-W29RiK/xtpCGqn6f3ixfRYGk+zRyr+Ew9F2E20BfXxT5/euLdA/Nm7fO7OeTGuAmTs30cpgInyJ0cYe708YTZw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
@@ -7423,10 +7401,6 @@ packages:
   validate-npm-package-name@5.0.1:
     resolution: {integrity: sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
-
-  validator@13.12.0:
-    resolution: {integrity: sha512-c1Q0mCiPlgdTVVVIJIrBuxNicYE+t/7oKeI9MWLj3fh/uq2Pxh/3eeWbVZ4OcGW1TUf53At0njHw5SMdA3tmMg==}
-    engines: {node: '>= 0.10'}
 
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
@@ -9654,8 +9628,6 @@ snapshots:
 
   '@polka/url@1.0.0-next.28': {}
 
-  '@poppinss/macroable@1.0.3': {}
-
   '@prisma/client@5.19.1(prisma@5.19.1)':
     optionalDependencies:
       prisma: 5.19.1
@@ -10785,8 +10757,6 @@ snapshots:
 
   '@types/uuid@9.0.8': {}
 
-  '@types/validator@13.12.2': {}
-
   '@types/wrap-ansi@3.0.0': {}
 
   '@typescript-eslint/parser@8.4.0(eslint@9.9.1(jiti@1.21.6))(typescript@5.5.4)':
@@ -10882,19 +10852,6 @@ snapshots:
       - terser
 
   '@vanilla-extract/private@1.0.6': {}
-
-  '@vinejs/compiler@2.5.0': {}
-
-  '@vinejs/vine@2.1.0':
-    dependencies:
-      '@poppinss/macroable': 1.0.3
-      '@types/validator': 13.12.2
-      '@vinejs/compiler': 2.5.0
-      camelcase: 8.0.0
-      dayjs: 1.11.13
-      dlv: 1.1.3
-      normalize-url: 8.0.1
-      validator: 13.12.0
 
   '@vitejs/plugin-react@4.3.1(vite@5.4.6(@types/node@22.6.1))':
     dependencies:
@@ -13912,8 +13869,6 @@ snapshots:
 
   normalize-range@0.1.2: {}
 
-  normalize-url@8.0.1: {}
-
   npm-install-checks@6.3.0:
     dependencies:
       semver: 7.6.3
@@ -15761,8 +15716,6 @@ snapshots:
       spdx-expression-parse: 3.0.1
 
   validate-npm-package-name@5.0.1: {}
-
-  validator@13.12.0: {}
 
   vary@1.1.2: {}
 
