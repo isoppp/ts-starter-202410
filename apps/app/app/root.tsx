@@ -7,7 +7,6 @@ import { httpBatchLink } from '@trpc/client'
 import type { ReactNode } from 'react'
 
 export const loader: LoaderFunction = ({ context }) => {
-  console.log('context.cf.env', JSON.stringify(context.cloudflare.env))
   return json({
     ENV: {
       API_BASE_URL: context.cloudflare.env.API_BASE_URL,
@@ -51,7 +50,6 @@ const queryClient = new QueryClient()
 
 export default function App() {
   const loaderData = useLoaderData<typeof loader>()
-  console.log(loaderData)
   const trpcClient = trpc.createClient({
     links: [
       httpBatchLink({
@@ -69,8 +67,6 @@ export default function App() {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <div id='baseurl'>{loaderData.ENV.API_BASE_URL}</div>
-        <div id='appenv'>{loaderData.ENV.APP_ENV}</div>
         <Outlet />
       </QueryClientProvider>
     </trpc.Provider>
