@@ -7,5 +7,6 @@ export default defineConfig({
   },
   splitting: false,
   clean: true,
+  format: ['esm'],
   outDir: '../app/app/generated/trpc',
 })
