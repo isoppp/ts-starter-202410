@@ -1,6 +1,6 @@
 import { trpc } from '@/lib/trpcClient'
 import type { LoaderFunction } from '@remix-run/cloudflare'
-import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react'
+import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration, json, useLoaderData } from '@remix-run/react'
 import './tailwind.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { httpBatchLink } from '@trpc/client'
@@ -8,12 +8,12 @@ import type { ReactNode } from 'react'
 
 export const loader: LoaderFunction = ({ context }) => {
   console.log('context.cf.env', JSON.stringify(context.cloudflare.env))
-  return {
+  return json({
     ENV: {
       API_BASE_URL: context.cloudflare.env.API_BASE_URL,
       APP_ENV: context.cloudflare.env.APP_ENV,
     },
-  }
+  })
 }
 
 export function Layout({ children }: { children: ReactNode }) {
