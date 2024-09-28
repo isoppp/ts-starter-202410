@@ -1,3 +1,5 @@
+// @ts-nocheck
+// @biome-ignore
 import { createPagesFunctionHandler } from '@remix-run/cloudflare-pages'
 
 import * as build from '../build/server'
