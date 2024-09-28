@@ -6,6 +6,7 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
+    "test": "turbo test",
     "lint-staged": "turbo lint-staged --concurrency=1",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },

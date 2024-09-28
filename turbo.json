@@ -9,6 +9,9 @@
     "typecheck": {
       "dependsOn": ["^typecheck"]
     },
+    "test": {
+      "dependsOn": ["^test"]
+    },
     "lint-staged": {
       "dependsOn": ["^lint-staged"],
       "cache": false
