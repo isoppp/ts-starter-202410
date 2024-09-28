@@ -1,23 +1,21 @@
 import { trpc } from '@/lib/trpcClient'
-import { vineResolver } from '@hookform/resolvers/vine'
+import { valibotResolver } from '@hookform/resolvers/valibot'
 import type { MetaFunction } from '@remix-run/cloudflare'
-import vine from '@vinejs/vine'
-import type { Infer } from '@vinejs/vine/types'
 import { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
+import * as v from 'valibot'
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Signup' }, { name: 'description', content: 'Signup' }]
 }
 
-const schema = vine.object({
-  email: vine.string().email(),
+const schema = v.object({
+  email: v.pipe(v.string(), v.email()),
 })
 
 export default function Signup() {
-  const validator = vine.compile(schema)
   const form = useForm({
-    resolver: vineResolver(validator),
+    resolver: valibotResolver(schema),
     defaultValues: {
       email: 'test@example.com',
     },
@@ -28,7 +26,7 @@ export default function Signup() {
     },
   })
   const onSubmit = useCallback(
-    async (values: Infer<typeof schema>) => {
+    async (values: v.InferInput<typeof schema>) => {
       mutation.mutate(values)
       console.log('please check you email!')
     },
