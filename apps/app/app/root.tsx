@@ -7,6 +7,7 @@ import { httpBatchLink } from '@trpc/client'
 import type { ReactNode } from 'react'
 
 export const loader: LoaderFunction = ({ context }) => {
+  console.log(context.cloudflare.env)
   return {
     ENV: {
       API_BASE_URL: context.cloudflare.env.API_BASE_URL,
