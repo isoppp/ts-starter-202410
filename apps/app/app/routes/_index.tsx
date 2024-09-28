@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { trpc } from '@/lib/trpcClient'
-import type { MetaFunction } from '@remix-run/node'
+import type { MetaFunction } from '@remix-run/cloudflare'
 
 export const meta: MetaFunction = () => {
   return [{ title: 'New Remix App' }, { name: 'description', content: 'Welcome to Remix!' }]
