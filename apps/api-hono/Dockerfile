@@ -12,7 +12,7 @@ RUN apt-get update -qq && \
 
 RUN npm i -g pnpm
 
-COPY --link . .
+COPY . .
 
 RUN pnpm i --prod
 
