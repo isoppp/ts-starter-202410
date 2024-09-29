@@ -7,9 +7,6 @@ ENV NODE_ENV=production
 
 FROM base as build
 
-RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential openssl
-
 RUN npm i -g pnpm
 
 COPY --link apps/api-hono .
