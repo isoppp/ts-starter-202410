@@ -24,8 +24,4 @@ RUN apt-get update -y && apt-get install -y openssl
 ENV NODE_ENV=production
 COPY --from=build /app /app
 
-# Entrypoint prepares the database.
-ENTRYPOINT ["/app/docker-entrypoint"]
-
-# Start the server by default, this can be overwritten at runtime
 CMD [ "npm", "run", "start" ]
