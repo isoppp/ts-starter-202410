@@ -12,7 +12,7 @@ RUN apt-get update -qq && \
 
 RUN npm i -g pnpm
 
-COPY . .
+COPY --link apps/api-hono .
 
 RUN pnpm i --prod
 
@@ -24,4 +24,4 @@ RUN apt-get update -y && apt-get install -y openssl
 ENV NODE_ENV=production
 COPY --from=build /app /app
 
-CMD [ "npm", "run", "start" ]
+CMD [ "npm", "start" ]
