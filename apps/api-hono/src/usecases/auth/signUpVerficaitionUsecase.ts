@@ -1,7 +1,9 @@
+import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
 import { SESSION_EXPIRATION_SEC } from '@/middlewares/cookie-session'
 import type { Context } from '@/trpc/trpc'
-import { addSeconds, isBefore } from 'date-fns'
+import { TRPCError } from '@trpc/server'
+import { addSeconds } from 'date-fns'
 import * as v from 'valibot'
 
 export const signUpVerificationSchema = v.object({
@@ -11,6 +13,7 @@ export const signUpVerificationSchema = v.object({
 type UseCaseArgs = {
   input: v.InferInput<typeof signUpVerificationSchema>
   ctx: Context
+  testFn?: ReturnType<typeof vitest.fn>
 }
 type UseCaseResult =
   | {
@@ -29,13 +32,30 @@ type TxResult =
       ok: false
       attemptExceeded: boolean
     }
-export const signUpVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Promise<UseCaseResult> => {
+export const signUpVerificationUsecase = async ({ ctx, input, testFn }: UseCaseArgs): Promise<UseCaseResult> => {
   const email = ctx.verificationEmail
   if (!email) {
-    return { ok: false, attemptExceeded: false }
+    logger.debug('email not found')
+    testFn?.('email not found')
+
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'Invalid Request',
+    })
   }
 
-  const txRes = await prisma.$transaction(async (prisma): Promise<TxResult> => {
+  const txResult = await prisma.$transaction(async (prisma): Promise<TxResult> => {
+    const existing = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    })
+    if (existing) {
+      logger.debug('user already exists')
+      testFn?.('user already exists')
+      return { ok: false, attemptExceeded: false }
+    }
+
     const verification = await prisma.verification.findUnique({
       where: {
         to: email,
@@ -48,6 +68,13 @@ export const signUpVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
     })
 
     if (!verification) {
+      logger.debug('verification not found')
+      testFn?.('verification not found')
+      return { ok: false, attemptExceeded: false }
+    }
+    if (verification.usedAt) {
+      logger.debug('verification already used')
+      testFn?.('verification already used')
       return { ok: false, attemptExceeded: false }
     }
 
@@ -61,17 +88,12 @@ export const signUpVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
         },
       },
     })
+
     const attemptExceeded = updatedVerification.attempt > 3
 
     if (attemptExceeded) {
-      return { ok: false, attemptExceeded }
-    }
-
-    if (verification.usedAt) {
-      return { ok: false, attemptExceeded }
-    }
-
-    if (isBefore(verification.expiresAt, new Date())) {
+      logger.debug('attempt exceeded')
+      testFn?.('attempt exceeded')
       return { ok: false, attemptExceeded }
     }
 
@@ -84,14 +106,6 @@ export const signUpVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
       },
     })
 
-    const existing = await prisma.user.findUnique({
-      where: {
-        email: verification.to,
-      },
-    })
-    if (existing) {
-      return { ok: false, attemptExceeded }
-    }
     const createdUser = await prisma.user.create({
       data: {
         email: verification.to,
@@ -105,15 +119,20 @@ export const signUpVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
       },
     })
 
+    logger.debug('session and user created')
+    testFn?.('session and user created')
     return {
       ok: true,
       sessionId: createdSession.id,
     }
   })
 
-  if (!txRes.ok) return txRes
+  if (!txResult.ok) {
+    logger.debug('txResult not ok')
+    return txResult
+  }
 
-  ctx.setSessionId(txRes.sessionId ?? null)
+  ctx.setSessionId(txResult.sessionId ?? null)
   ctx.setVerificationEmail(null)
   return { ok: true }
 }

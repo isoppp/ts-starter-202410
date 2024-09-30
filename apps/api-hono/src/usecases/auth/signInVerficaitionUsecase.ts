@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
 import { SESSION_EXPIRATION_SEC } from '@/middlewares/cookie-session'
 import type { Context } from '@/trpc/trpc'
@@ -12,6 +13,7 @@ export const signInVerificationSchema = v.object({
 type UseCaseArgs = {
   input: v.InferInput<typeof signInVerificationSchema>
   ctx: Context
+  testFn?: ReturnType<typeof vitest.fn>
 }
 type UseCaseResult =
   | {
@@ -21,9 +23,11 @@ type UseCaseResult =
       ok: false
       attemptExceeded: boolean
     }
-export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Promise<UseCaseResult> => {
+export const signInVerificationUsecase = async ({ ctx, input, testFn }: UseCaseArgs): Promise<UseCaseResult> => {
   const email = ctx.verificationEmail
   if (!email) {
+    logger.debug('email not found')
+    testFn?.('email not found')
     throw new TRPCError({
       code: 'BAD_REQUEST',
       message: 'Invalid Request',
@@ -31,6 +35,18 @@ export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
   }
 
   const txResult = await prisma.$transaction(async (prisma) => {
+    const createdUser = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    })
+
+    if (!createdUser) {
+      logger.debug('user not found')
+      testFn?.('user not found')
+      return { ok: false }
+    }
+
     const verification = await prisma.verification.findUnique({
       where: {
         to: email,
@@ -43,6 +59,13 @@ export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
     })
 
     if (!verification) {
+      logger.debug('verification not found')
+      testFn?.('verification not found')
+      return { ok: false }
+    }
+    if (verification.usedAt) {
+      logger.debug('verification already used')
+      testFn?.('verification already used')
       return { ok: false }
     }
 
@@ -59,10 +82,8 @@ export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
     const attemptExceeded = updatedVerification.attempt > 3
 
     if (attemptExceeded) {
-      return { ok: false, attemptExceeded }
-    }
-
-    if (verification.usedAt) {
+      logger.debug('attempt exceeded')
+      testFn?.('attempt exceeded')
       return { ok: false, attemptExceeded }
     }
 
@@ -75,14 +96,6 @@ export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
       },
     })
 
-    const createdUser = await prisma.user.findUnique({
-      where: {
-        email: email,
-      },
-    })
-
-    if (!createdUser) return { ok: false, attemptExceeded }
-
     const createdSession = await prisma.session.create({
       data: {
         expiresAt: addSeconds(new Date(), SESSION_EXPIRATION_SEC),
@@ -90,13 +103,18 @@ export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Pr
       },
     })
 
+    logger.debug('session created')
+    testFn?.('session created')
     return {
       ok: true,
       sessionId: createdSession.id,
     }
   })
 
-  if (!txResult.ok) return { ok: false, attemptExceeded: !!txResult.attemptExceeded }
+  if (!txResult.ok) {
+    logger.debug('txResult not ok')
+    return { ok: false, attemptExceeded: !!txResult.attemptExceeded }
+  }
 
   ctx.setSessionId(txResult.sessionId ?? null)
   ctx.setVerificationEmail(null)
