@@ -1,4 +1,5 @@
-import { initialize } from '@/generated/fabbrica'
-import { prisma } from '@/lib/prisma'
+import { vi } from 'vitest'
 
-initialize({ prisma })
+vi.mock('@/lib/prisma', () => ({
+  prisma: vPrisma.client,
+}))

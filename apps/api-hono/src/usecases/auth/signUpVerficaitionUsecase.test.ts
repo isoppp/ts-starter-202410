@@ -1,7 +1,6 @@
-import { defineVerificationFactory } from '@/generated/fabbrica'
+import { defineVerificationFactory, initialize } from '@/generated/fabbrica'
 import { prisma } from '@/lib/prisma'
 import type { Context } from '@/trpc/trpc'
-import { faker } from '@faker-js/faker'
 import { addMinutes } from 'date-fns'
 import { expect, vitest } from 'vitest'
 import { signUpVerificationUsecase } from './signUpVerficaitionUsecase'
@@ -10,7 +9,7 @@ const VerificationFactory = defineVerificationFactory({
   defaultData: {
     type: 'EMAIL_SIGN_UP',
     expiresAt: addMinutes(new Date(), 5),
-    to: `test-${faker.string.nanoid()}@example.com`,
+    to: 'test@example.com',
   },
 })
 const createCtx = (ctx: Partial<Context> = {}): Context => {
@@ -26,25 +25,26 @@ const createCtx = (ctx: Partial<Context> = {}): Context => {
   }
 }
 
-describe(signUpVerificationUsecase.name, async () => {
+const setup = async () => {
   const fn = vitest.fn()
-  let verification = await VerificationFactory.create()
-  let ctx = createCtx({
+  const verification = await VerificationFactory.create()
+  const ctx = createCtx({
     verificationEmail: verification.to,
   })
+  return {
+    fn,
+    verification,
+    ctx,
+  }
+}
 
+describe(signUpVerificationUsecase.name, async () => {
   beforeEach(async () => {
-    await prisma.user.deleteMany()
-    await prisma.verification.deleteMany()
-    await prisma.session.deleteMany()
-    verification = await VerificationFactory.create()
-    ctx = createCtx({
-      verificationEmail: verification.to,
-    })
-    vitest.clearAllMocks()
+    initialize({ prisma })
   })
 
   it('should be success then create user and set session variables', async () => {
+    const { verification, ctx, fn } = await setup()
     const res = await signUpVerificationUsecase({
       ctx,
       input: {
@@ -69,6 +69,7 @@ describe(signUpVerificationUsecase.name, async () => {
   })
 
   it('should be failed since email is not provided', async () => {
+    const { verification, ctx, fn } = await setup()
     await expect(
       signUpVerificationUsecase({
         ctx: {
@@ -85,6 +86,7 @@ describe(signUpVerificationUsecase.name, async () => {
   })
 
   it('should be failed since user exists', async () => {
+    const fn = vitest.fn()
     const verification = await VerificationFactory.create({
       usedAt: new Date(),
     })
@@ -109,6 +111,7 @@ describe(signUpVerificationUsecase.name, async () => {
   })
 
   it('should be failed since no verification record', async () => {
+    const { verification, ctx, fn } = await setup()
     const res = await signUpVerificationUsecase({
       ctx,
       input: {
@@ -121,6 +124,7 @@ describe(signUpVerificationUsecase.name, async () => {
   })
 
   it('should be failed since it was already expired ( not found )', async () => {
+    const fn = vitest.fn()
     const verification = await VerificationFactory.create({
       expiresAt: addMinutes(new Date(), -1),
     })
@@ -139,6 +143,8 @@ describe(signUpVerificationUsecase.name, async () => {
   })
 
   it('should be failed since it was already used', async () => {
+    const fn = vitest.fn()
+
     const verification = await VerificationFactory.create({
       usedAt: new Date(),
     })
@@ -150,11 +156,14 @@ describe(signUpVerificationUsecase.name, async () => {
       input: {
         token: verification.token,
       },
+      testFn: fn,
     })
     expect(res.ok).toBe(false)
+    expect(fn).toHaveBeenCalledWith('verification already used')
   })
 
   it('should be failed since attempt exceeded', async () => {
+    const fn = vitest.fn()
     const verification = await VerificationFactory.create({
       attempt: 3,
     })
@@ -166,7 +175,9 @@ describe(signUpVerificationUsecase.name, async () => {
       input: {
         token: verification.token,
       },
+      testFn: fn,
     })
     expect(res.ok).toBe(false)
+    expect(fn).toHaveBeenCalledWith('attempt exceeded')
   })
 })
