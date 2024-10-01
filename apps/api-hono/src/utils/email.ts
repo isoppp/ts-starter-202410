@@ -1,4 +1,5 @@
 import { env } from '@/lib/env'
+import { logger } from '@/lib/logger'
 import { renderAsync } from '@react-email/components'
 import type { ReactElement } from 'react'
 
@@ -21,8 +22,8 @@ export const sendEmail = async ({ react, ...options }: SendEmailOptions) => {
     ...(react ? await renderReactEmail(react) : null),
   }
 
-  if (env.APP_ENV === 'local') {
-    console.log(`Would have sent the following email to ${email.to}:`, JSON.stringify(email))
+  if (env.APP_ENV === 'local' || env.APP_ENV === 'test') {
+    logger.debug(`Would have sent the following email to ${email.to}:\n${JSON.stringify(email)}`)
     return {
       ok: true,
     } as const
