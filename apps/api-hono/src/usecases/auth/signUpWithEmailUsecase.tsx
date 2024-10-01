@@ -1,11 +1,11 @@
 import SignUpVerification from '@/infrastructure/email/templates/SignUpVerification'
 import { logger } from '@/lib/logger'
-import { prisma } from '@/lib/prisma'
+import { withTransaction } from '@/lib/prisma'
+import { getUserByEmail } from '@/module/user'
+import { createVerification, getRecentUnusedVerification } from '@/module/verification'
 import type { Context } from '@/trpc/trpc'
-import { generateRandomURLString } from '@/utils/auth'
 import { sendEmail } from '@/utils/email'
 import { TRPCError } from '@trpc/server'
-import { addMinutes } from 'date-fns'
 import * as v from 'valibot'
 
 export const signUpWithEmailSchema = v.object({
@@ -18,12 +18,8 @@ type UseCaseArgs = {
   testFn?: ReturnType<typeof vitest.fn>
 }
 export const signUpWithEmailUsecase = async ({ ctx, input, testFn }: UseCaseArgs): Promise<{ ok: boolean }> => {
-  const txRes = await prisma.$transaction(async (prisma) => {
-    const existingUser = await prisma.user.findUnique({
-      where: {
-        email: input.email,
-      },
-    })
+  const txRes = await withTransaction(async () => {
+    const existingUser = await getUserByEmail(input.email)
 
     // Don't send any detailed message but may be good to send sign-in email instead.
     if (existingUser) {
@@ -32,16 +28,7 @@ export const signUpWithEmailUsecase = async ({ ctx, input, testFn }: UseCaseArgs
       return { ok: false }
     }
 
-    const dupVerification = await prisma.verification.findFirst({
-      where: {
-        to: input.email,
-        type: 'EMAIL_SIGN_UP',
-        createdAt: {
-          gte: addMinutes(new Date(), -1),
-        },
-        usedAt: null,
-      },
-    })
+    const dupVerification = await getRecentUnusedVerification(input.email, 'EMAIL_SIGN_UP')
 
     if (dupVerification) {
       logger.debug('signup request is already sent', { email: input.email })
@@ -52,14 +39,7 @@ export const signUpWithEmailUsecase = async ({ ctx, input, testFn }: UseCaseArgs
       })
     }
 
-    const created = await prisma.verification.create({
-      data: {
-        type: 'EMAIL_SIGN_UP',
-        token: generateRandomURLString(128),
-        expiresAt: addMinutes(new Date(), 5),
-        to: input.email,
-      },
-    })
+    const created = await createVerification(input.email, 'EMAIL_SIGN_UP')
 
     // TODO send email
     await sendEmail({

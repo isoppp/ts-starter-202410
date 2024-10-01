@@ -108,7 +108,7 @@ describe(signUpVerificationUsecase.name, async () => {
       testFn: fn,
     })
     expect(res.ok).toBe(false)
-    expect(fn).toHaveBeenCalledWith('verification not found')
+    expect(fn).toHaveBeenCalledWith('valid verification not found')
   })
 
   it('should be failed since it was already expired ( not found )', async () => {
@@ -127,7 +127,7 @@ describe(signUpVerificationUsecase.name, async () => {
       testFn: fn,
     })
     expect(res.ok).toBe(false)
-    expect(fn).toHaveBeenCalledWith('verification not found')
+    expect(fn).toHaveBeenCalledWith('valid verification not found')
   })
 
   it('should be failed since it was already used', async () => {
@@ -147,7 +147,7 @@ describe(signUpVerificationUsecase.name, async () => {
       testFn: fn,
     })
     expect(res.ok).toBe(false)
-    expect(fn).toHaveBeenCalledWith('verification already used')
+    expect(fn).toHaveBeenCalledWith('valid verification not found')
   })
 
   it('should be failed since attempt exceeded', async () => {

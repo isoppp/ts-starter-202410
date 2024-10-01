@@ -1,11 +1,11 @@
 import SignInVerification from '@/infrastructure/email/templates/SignInVerification'
 import { logger } from '@/lib/logger'
-import { prisma } from '@/lib/prisma'
+import { withTransaction } from '@/lib/prisma'
+import { getUserByEmail } from '@/module/user'
+import { createVerification, getRecentUnusedVerification } from '@/module/verification'
 import type { Context } from '@/trpc/trpc'
-import { generateRandomURLString } from '@/utils/auth'
 import { sendEmail } from '@/utils/email'
 import { TRPCError } from '@trpc/server'
-import { addMinutes } from 'date-fns'
 import * as v from 'valibot'
 export const signInWithEmailSchema = v.object({
   email: v.pipe(v.string(), v.email()),
@@ -17,29 +17,16 @@ type UseCaseArgs = {
   testFn?: ReturnType<typeof vitest.fn>
 }
 export const signInWithEmailUsecase = async ({ ctx, input, testFn }: UseCaseArgs): Promise<{ ok: boolean }> => {
-  const txRes = await prisma.$transaction(async (prisma) => {
-    const user = await prisma.user.findUnique({
-      where: {
-        email: input.email,
-      },
-    })
+  const txRes = await withTransaction(async () => {
+    const existingUser = await getUserByEmail(input.email)
 
-    if (!user) {
+    if (!existingUser) {
       logger.debug('user not found', { email: input.email })
       testFn?.('user not found')
       return { ok: false }
     }
 
-    const dupVerification = await prisma.verification.findFirst({
-      where: {
-        to: input.email,
-        type: 'EMAIL_SIGN_IN',
-        createdAt: {
-          gte: addMinutes(new Date(), -1),
-        },
-        usedAt: null,
-      },
-    })
+    const dupVerification = await getRecentUnusedVerification(input.email, 'EMAIL_SIGN_IN')
 
     if (dupVerification) {
       logger.debug('signin request is already sent', { email: input.email })
@@ -50,14 +37,7 @@ export const signInWithEmailUsecase = async ({ ctx, input, testFn }: UseCaseArgs
       })
     }
 
-    const created = await prisma.verification.create({
-      data: {
-        type: 'EMAIL_SIGN_IN',
-        token: generateRandomURLString(128),
-        expiresAt: addMinutes(new Date(), 5),
-        to: input.email,
-      },
-    })
+    const created = await createVerification(input.email, 'EMAIL_SIGN_IN')
 
     await sendEmail({
       to: input.email,
