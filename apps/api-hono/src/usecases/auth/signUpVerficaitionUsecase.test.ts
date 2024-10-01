@@ -1,6 +1,6 @@
 import { defineVerificationFactory, initialize } from '@/generated/fabbrica'
 import { prisma } from '@/lib/prisma'
-import type { Context } from '@/trpc/trpc'
+import { createTestCtx, testEmail } from '@/test/helper'
 import { addMinutes } from 'date-fns'
 import { expect, vitest } from 'vitest'
 import { signUpVerificationUsecase } from './signUpVerficaitionUsecase'
@@ -9,26 +9,14 @@ const VerificationFactory = defineVerificationFactory({
   defaultData: {
     type: 'EMAIL_SIGN_UP',
     expiresAt: addMinutes(new Date(), 5),
-    to: 'test@example.com',
+    to: testEmail,
   },
 })
-const createCtx = (ctx: Partial<Context> = {}): Context => {
-  const setVerificationEmail = vitest.fn() as Context['setVerificationEmail']
-  const setSessionId = vitest.fn() as Context['setSessionId']
-  return {
-    verificationEmail: null,
-    userId: null,
-    sessionId: null,
-    setVerificationEmail,
-    setSessionId,
-    ...(ctx ?? {}),
-  }
-}
 
 const setup = async () => {
   const fn = vitest.fn()
   const verification = await VerificationFactory.create()
-  const ctx = createCtx({
+  const ctx = createTestCtx({
     verificationEmail: verification.to,
   })
   return {
@@ -96,7 +84,7 @@ describe(signUpVerificationUsecase.name, async () => {
       },
     })
 
-    const ctx = createCtx({
+    const ctx = createTestCtx({
       verificationEmail: verification.to,
     })
     const res = await signUpVerificationUsecase({
@@ -128,7 +116,7 @@ describe(signUpVerificationUsecase.name, async () => {
     const verification = await VerificationFactory.create({
       expiresAt: addMinutes(new Date(), -1),
     })
-    const ctx = createCtx({
+    const ctx = createTestCtx({
       verificationEmail: verification.to,
     })
     const res = await signUpVerificationUsecase({
@@ -148,7 +136,7 @@ describe(signUpVerificationUsecase.name, async () => {
     const verification = await VerificationFactory.create({
       usedAt: new Date(),
     })
-    const ctx = createCtx({
+    const ctx = createTestCtx({
       verificationEmail: verification.to,
     })
     const res = await signUpVerificationUsecase({
@@ -167,7 +155,7 @@ describe(signUpVerificationUsecase.name, async () => {
     const verification = await VerificationFactory.create({
       attempt: 3,
     })
-    const ctx = createCtx({
+    const ctx = createTestCtx({
       verificationEmail: verification.to,
     })
     const res = await signUpVerificationUsecase({

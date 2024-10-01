@@ -1,34 +1,20 @@
 import { defineUserFactory, defineVerificationFactory, initialize } from '@/generated/fabbrica'
 import { prisma } from '@/lib/prisma'
-import type { Context } from '@/trpc/trpc'
+import { createTestCtx, testEmail } from '@/test/helper'
 import { signInWithEmailUsecase } from '@/usecases/auth/signInWithEmailUsecase'
 import { addMinutes, addSeconds } from 'date-fns'
 import { describe, expect, vitest } from 'vitest'
 
-const testEmail = 'test@example.com'
 const userFactory = defineUserFactory({
   defaultData: {
     email: testEmail,
   },
 })
 
-const createCtx = (ctx: Partial<Context> = {}): Context => {
-  const setVerificationEmail = vitest.fn() as Context['setVerificationEmail']
-  const setSessionId = vitest.fn() as Context['setSessionId']
-  return {
-    verificationEmail: null,
-    userId: null,
-    sessionId: null,
-    setVerificationEmail,
-    setSessionId,
-    ...(ctx ?? {}),
-  }
-}
-
 const setup = async () => {
   const user = await userFactory.create()
   const fn = vitest.fn()
-  const ctx = createCtx({
+  const ctx = createTestCtx({
     verificationEmail: user.email,
   })
   return {
@@ -55,7 +41,7 @@ describe(signInWithEmailUsecase.name, () => {
 
     expect(res.ok).toBe(true)
     expect(fn).not.toHaveBeenCalled()
-    expect(ctx.setVerificationEmail).toHaveBeenCalledWith('test@example.com')
+    expect(ctx.setVerificationEmail).toHaveBeenCalledWith(testEmail)
   })
 
   it('should be failed since user is not found', async () => {

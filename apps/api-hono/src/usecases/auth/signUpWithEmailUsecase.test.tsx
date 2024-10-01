@@ -1,27 +1,13 @@
 import { defineUserFactory, defineVerificationFactory, initialize } from '@/generated/fabbrica'
 import { prisma } from '@/lib/prisma'
-import type { Context } from '@/trpc/trpc'
+import { createTestCtx, testEmail } from '@/test/helper'
 import { signUpWithEmailUsecase } from '@/usecases/auth/signUpWithEmailUsecase'
 import { addMinutes, addSeconds } from 'date-fns'
 import { describe, expect, vitest } from 'vitest'
 
-const dummyEmail = 'test@example.com'
-const createCtx = (ctx: Partial<Context> = {}): Context => {
-  const setVerificationEmail = vitest.fn() as Context['setVerificationEmail']
-  const setSessionId = vitest.fn() as Context['setSessionId']
-  return {
-    verificationEmail: null,
-    userId: null,
-    sessionId: null,
-    setVerificationEmail,
-    setSessionId,
-    ...(ctx ?? {}),
-  }
-}
-
 const setup = async () => {
   const fn = vitest.fn()
-  const ctx = createCtx()
+  const ctx = createTestCtx()
   return {
     fn,
     ctx,
@@ -38,14 +24,14 @@ describe(signUpWithEmailUsecase.name, () => {
     const res = await signUpWithEmailUsecase({
       ctx,
       input: {
-        email: dummyEmail,
+        email: testEmail,
       },
       testFn: fn,
     })
 
     expect(res.ok).toBe(true)
     expect(fn).not.toHaveBeenCalled()
-    expect(ctx.setVerificationEmail).toHaveBeenCalledWith(dummyEmail)
+    expect(ctx.setVerificationEmail).toHaveBeenCalledWith(testEmail)
     expect(
       await prisma.verification.findFirst({
         where: {
@@ -53,14 +39,14 @@ describe(signUpWithEmailUsecase.name, () => {
           expiresAt: {
             gte: new Date(),
           },
-          to: dummyEmail,
+          to: testEmail,
         },
       }),
     ).toBeTruthy()
   })
 
   it('should be failed since email duplicate', async () => {
-    const user = await defineUserFactory().create({ email: dummyEmail })
+    const user = await defineUserFactory().create({ email: testEmail })
     const { ctx, fn } = await setup()
     const res = await signUpWithEmailUsecase({
       ctx,
@@ -77,7 +63,7 @@ describe(signUpWithEmailUsecase.name, () => {
     const { ctx, fn } = await setup()
     await defineVerificationFactory().create({
       type: 'EMAIL_SIGN_UP',
-      to: dummyEmail,
+      to: testEmail,
       expiresAt: addMinutes(new Date(), 5),
       usedAt: null,
     })
@@ -85,7 +71,7 @@ describe(signUpWithEmailUsecase.name, () => {
       signUpWithEmailUsecase({
         ctx,
         input: {
-          email: dummyEmail,
+          email: testEmail,
         },
         testFn: fn,
       }),
@@ -97,7 +83,7 @@ describe(signUpWithEmailUsecase.name, () => {
     const { ctx, fn } = await setup()
     await defineVerificationFactory().create({
       type: 'EMAIL_SIGN_UP',
-      to: dummyEmail,
+      to: testEmail,
       expiresAt: addSeconds(addMinutes(new Date(), 5), -61),
       createdAt: addSeconds(new Date(), -61),
       usedAt: null,
@@ -105,7 +91,7 @@ describe(signUpWithEmailUsecase.name, () => {
     const res = await signUpWithEmailUsecase({
       ctx,
       input: {
-        email: dummyEmail,
+        email: testEmail,
       },
       testFn: fn,
     })

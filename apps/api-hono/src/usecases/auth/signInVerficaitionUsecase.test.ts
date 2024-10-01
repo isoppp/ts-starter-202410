@@ -1,14 +1,13 @@
 import { defineUserFactory, defineVerificationFactory, initialize } from '@/generated/fabbrica'
 import { prisma } from '@/lib/prisma'
-import type { Context } from '@/trpc/trpc'
+import { createTestCtx, testEmail } from '@/test/helper'
 import { signInVerificationUsecase } from '@/usecases/auth/signInVerficaitionUsecase'
-import { faker } from '@faker-js/faker'
 import { addMinutes } from 'date-fns'
 import { vitest } from 'vitest'
 
 const UserFactory = defineUserFactory({
   defaultData: async () => ({
-    email: `test-${faker.string.nanoid()}@example.com`,
+    email: testEmail,
   }),
 })
 const VerificationFactory = defineVerificationFactory({
@@ -17,18 +16,6 @@ const VerificationFactory = defineVerificationFactory({
     expiresAt: addMinutes(new Date(), 5),
   },
 })
-const createCtx = (ctx: Partial<Context> = {}): Context => {
-  const setVerificationEmail = vitest.fn() as Context['setVerificationEmail']
-  const setSessionId = vitest.fn() as Context['setSessionId']
-  return {
-    verificationEmail: null,
-    userId: null,
-    sessionId: null,
-    setVerificationEmail,
-    setSessionId,
-    ...(ctx ?? {}),
-  }
-}
 
 const setup = async () => {
   const fn = vitest.fn()
@@ -36,7 +23,7 @@ const setup = async () => {
   const verification = await VerificationFactory.create({
     to: user.email,
   })
-  const ctx = createCtx({
+  const ctx = createTestCtx({
     verificationEmail: user.email,
   })
   return {
@@ -83,7 +70,7 @@ describe(signInVerificationUsecase.name, async () => {
       to: `${user.email}invalid`,
       attempt: 3,
     })
-    const ctx = createCtx({
+    const ctx = createTestCtx({
       verificationEmail: `${user.email}invalid`,
     })
     const res = await signInVerificationUsecase({
@@ -134,7 +121,7 @@ describe(signInVerificationUsecase.name, async () => {
       to: user.email,
       expiresAt: addMinutes(new Date(), -1),
     })
-    const ctx = createCtx({
+    const ctx = createTestCtx({
       verificationEmail: user.email,
     })
     const res = await signInVerificationUsecase({
@@ -155,7 +142,7 @@ describe(signInVerificationUsecase.name, async () => {
       to: user.email,
       usedAt: new Date(),
     })
-    const ctx = createCtx({
+    const ctx = createTestCtx({
       verificationEmail: user.email,
     })
     const res = await signInVerificationUsecase({
@@ -176,7 +163,7 @@ describe(signInVerificationUsecase.name, async () => {
       to: user.email,
       attempt: 3,
     })
-    const ctx = createCtx({
+    const ctx = createTestCtx({
       verificationEmail: user.email,
     })
     const res = await signInVerificationUsecase({
