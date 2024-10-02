@@ -1,3 +1,4 @@
+import { env } from '@/lib/env'
 import winston from 'winston'
 
 // Imports the Google Cloud client library for Winston
@@ -10,7 +11,7 @@ const pinoLikeFormat = winston.format.printf(({ level, message, timestamp }) => 
 })
 
 export const logger = winston.createLogger({
-  level: 'debug',
+  level: env.APP_ENV === 'test' ? 'debug' : 'info',
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(
@@ -21,6 +22,7 @@ export const logger = winston.createLogger({
         // winston.format.cli(),
         pinoLikeFormat,
       ),
+      forceConsole: env.APP_ENV === 'test',
     }),
     process.env.GOOGLE_APPLICATION_CREDENTIALS
       ? new LoggingWinston({

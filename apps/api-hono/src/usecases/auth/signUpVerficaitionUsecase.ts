@@ -1,7 +1,10 @@
-import { prisma } from '@/lib/prisma'
-import { SESSION_EXPIRATION_SEC } from '@/middlewares/cookie-session'
+import { logger } from '@/lib/logger'
+import { withTransaction } from '@/lib/prisma'
+import { createNewSession } from '@/module/session'
+import { createUserByEmail, getUserByEmail } from '@/module/user'
+import { addVerificationAttempt, getValidVerification, isAttemptExceeded, useVerification } from '@/module/verification'
 import type { Context } from '@/trpc/trpc'
-import { addSeconds, isBefore } from 'date-fns'
+import { TRPCError } from '@trpc/server'
 import * as v from 'valibot'
 
 export const signUpVerificationSchema = v.object({
@@ -11,6 +14,7 @@ export const signUpVerificationSchema = v.object({
 type UseCaseArgs = {
   input: v.InferInput<typeof signUpVerificationSchema>
   ctx: Context
+  testFn?: ReturnType<typeof vitest.fn>
 }
 type UseCaseResult =
   | {
@@ -29,91 +33,61 @@ type TxResult =
       ok: false
       attemptExceeded: boolean
     }
-export const signUpVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Promise<UseCaseResult> => {
+export const signUpVerificationUsecase = async ({ ctx, input, testFn }: UseCaseArgs): Promise<UseCaseResult> => {
   const email = ctx.verificationEmail
   if (!email) {
-    return { ok: false, attemptExceeded: false }
+    logger.debug('email not found')
+    testFn?.('email not found')
+
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'Invalid Request',
+    })
   }
 
-  const txRes = await prisma.$transaction(async (prisma): Promise<TxResult> => {
-    const verification = await prisma.verification.findUnique({
-      where: {
-        to: email,
-        token: input.token,
-        type: 'EMAIL_SIGN_UP',
-        expiresAt: {
-          gte: new Date(),
-        },
-      },
-    })
-
-    if (!verification) {
+  const txResult = await withTransaction(async (): Promise<TxResult> => {
+    const existing = await getUserByEmail(email)
+    if (existing) {
+      logger.debug('user already exists')
+      testFn?.('user already exists')
       return { ok: false, attemptExceeded: false }
     }
 
-    const updatedVerification = await prisma.verification.update({
-      where: {
-        id: verification.id,
-      },
-      data: {
-        attempt: {
-          increment: 1,
-        },
-      },
-    })
-    const attemptExceeded = updatedVerification.attempt > 3
+    const verification = await getValidVerification(email, input.token, 'EMAIL_SIGN_UP')
 
-    if (attemptExceeded) {
-      return { ok: false, attemptExceeded }
+    if (!verification) {
+      logger.debug('valid verification not found')
+      testFn?.('valid verification not found')
+      return { ok: false, attemptExceeded: false }
     }
 
-    if (verification.usedAt) {
-      return { ok: false, attemptExceeded }
+    const updatedVerification = await addVerificationAttempt(verification.id)
+    const _isAttemptExceeded = isAttemptExceeded(updatedVerification.attempt)
+    if (isAttemptExceeded(updatedVerification.attempt)) {
+      logger.debug('attempt exceeded')
+      testFn?.('attempt exceeded')
+      return { ok: false, attemptExceeded: _isAttemptExceeded }
     }
 
-    if (isBefore(verification.expiresAt, new Date())) {
-      return { ok: false, attemptExceeded }
-    }
+    await useVerification(updatedVerification.id)
 
-    await prisma.verification.update({
-      where: {
-        id: verification.id,
-      },
-      data: {
-        usedAt: new Date(),
-      },
-    })
+    const createdUser = await createUserByEmail(verification.to)
+    const createdSession = await createNewSession(createdUser.id)
 
-    const existing = await prisma.user.findUnique({
-      where: {
-        email: verification.to,
-      },
-    })
-    if (existing) {
-      return { ok: false, attemptExceeded }
-    }
-    const createdUser = await prisma.user.create({
-      data: {
-        email: verification.to,
-      },
-    })
-
-    const createdSession = await prisma.session.create({
-      data: {
-        expiresAt: addSeconds(new Date(), SESSION_EXPIRATION_SEC),
-        userId: createdUser.id,
-      },
-    })
-
+    logger.debug('session and user created')
+    testFn?.('session and user created')
     return {
       ok: true,
       sessionId: createdSession.id,
     }
   })
 
-  if (!txRes.ok) return txRes
+  if (!txResult.ok) {
+    logger.debug('txResult not ok')
+    return txResult
+  }
 
-  ctx.setSessionId(txRes.sessionId ?? null)
+  ctx.setSessionId(txResult.sessionId ?? null)
   ctx.setVerificationEmail(null)
   return { ok: true }
 }

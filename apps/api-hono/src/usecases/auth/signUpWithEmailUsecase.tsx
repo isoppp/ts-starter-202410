@@ -1,9 +1,11 @@
 import SignUpVerification from '@/infrastructure/email/templates/SignUpVerification'
-import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
+import { withTransaction } from '@/lib/prisma'
+import { getUserByEmail } from '@/module/user'
+import { createVerification, getRecentUnusedVerification } from '@/module/verification'
 import type { Context } from '@/trpc/trpc'
-import { generateRandomURLString } from '@/utils/auth'
 import { sendEmail } from '@/utils/email'
-import { addMinutes } from 'date-fns'
+import { TRPCError } from '@trpc/server'
 import * as v from 'valibot'
 
 export const signUpWithEmailSchema = v.object({
@@ -13,28 +15,31 @@ export const signUpWithEmailSchema = v.object({
 type UseCaseArgs = {
   input: v.InferInput<typeof signUpWithEmailSchema>
   ctx: Context
+  testFn?: ReturnType<typeof vitest.fn>
 }
-export const signUpWithEmailUsecase = async ({ ctx, input }: UseCaseArgs): Promise<{ ok: true }> => {
-  const txRes = await prisma.$transaction(async (prisma) => {
-    const existingUser = await prisma.user.findUnique({
-      where: {
-        email: input.email,
-      },
-    })
+export const signUpWithEmailUsecase = async ({ ctx, input, testFn }: UseCaseArgs): Promise<{ ok: boolean }> => {
+  const txRes = await withTransaction(async () => {
+    const existingUser = await getUserByEmail(input.email)
 
     // Don't send any detailed message but may be good to send sign-in email instead.
     if (existingUser) {
+      logger.debug('user already exists')
+      testFn?.('user already exists')
       return { ok: false }
     }
 
-    const created = await prisma.verification.create({
-      data: {
-        type: 'EMAIL_SIGN_UP',
-        token: generateRandomURLString(128),
-        expiresAt: addMinutes(new Date(), 5),
-        to: input.email,
-      },
-    })
+    const dupVerification = await getRecentUnusedVerification(input.email, 'EMAIL_SIGN_UP')
+
+    if (dupVerification) {
+      logger.debug('signup request is already sent', { email: input.email })
+      testFn?.('signup request is already sent')
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'signup request is already sent',
+      })
+    }
+
+    const created = await createVerification(input.email, 'EMAIL_SIGN_UP')
 
     // TODO send email
     await sendEmail({
@@ -47,7 +52,11 @@ export const signUpWithEmailUsecase = async ({ ctx, input }: UseCaseArgs): Promi
   })
 
   // Don't send any detailed message for security.
-  if (!txRes.ok) return { ok: true }
+  if (!txRes.ok) {
+    logger.debug('transaction failed')
+    testFn?.('transaction failed')
+    return { ok: false }
+  }
 
   ctx.setVerificationEmail(input.email)
   return { ok: true }

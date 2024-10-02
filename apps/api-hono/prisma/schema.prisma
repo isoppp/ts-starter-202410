@@ -9,6 +9,11 @@ generator client {
   previewFeatures = ["tracing"]
 }
 
+generator fabbrica {
+  provider = "prisma-fabbrica"
+  output   = "../src/generated/fabbrica"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -60,5 +65,6 @@ model Verification {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([to, token, type])
+  @@index([to, token, type, expiresAt]) // verify
+  @@index([to, type, createdAt, usedAt]) // signin
 }

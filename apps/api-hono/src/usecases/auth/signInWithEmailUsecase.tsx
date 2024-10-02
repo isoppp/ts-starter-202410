@@ -1,10 +1,11 @@
 import SignInVerification from '@/infrastructure/email/templates/SignInVerification'
-import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
+import { withTransaction } from '@/lib/prisma'
+import { getUserByEmail } from '@/module/user'
+import { createVerification, getRecentUnusedVerification } from '@/module/verification'
 import type { Context } from '@/trpc/trpc'
-import { generateRandomURLString } from '@/utils/auth'
 import { sendEmail } from '@/utils/email'
 import { TRPCError } from '@trpc/server'
-import { addMinutes } from 'date-fns'
 import * as v from 'valibot'
 export const signInWithEmailSchema = v.object({
   email: v.pipe(v.string(), v.email()),
@@ -13,45 +14,30 @@ export const signInWithEmailSchema = v.object({
 type UseCaseArgs = {
   input: v.InferInput<typeof signInWithEmailSchema>
   ctx: Context
+  testFn?: ReturnType<typeof vitest.fn>
 }
-export const signInWithEmailUsecase = async ({ ctx, input }: UseCaseArgs): Promise<{ ok: boolean }> => {
-  const txRes = await prisma.$transaction(async (prisma) => {
-    const user = await prisma.user.findUnique({
-      where: {
-        email: input.email,
-      },
-    })
+export const signInWithEmailUsecase = async ({ ctx, input, testFn }: UseCaseArgs): Promise<{ ok: boolean }> => {
+  const txRes = await withTransaction(async () => {
+    const existingUser = await getUserByEmail(input.email)
 
-    if (!user) return { ok: false }
+    if (!existingUser) {
+      logger.debug('user not found', { email: input.email })
+      testFn?.('user not found')
+      return { ok: false }
+    }
 
-    const hasValidVerification = await prisma.verification.findFirst({
-      where: {
-        to: input.email,
-        type: 'EMAIL_SIGN_IN',
-        expiresAt: {
-          gte: new Date(),
-        },
-        attempt: {
-          lte: 3,
-        },
-      },
-    })
+    const dupVerification = await getRecentUnusedVerification(input.email, 'EMAIL_SIGN_IN')
 
-    if (hasValidVerification) {
+    if (dupVerification) {
+      logger.debug('signin request is already sent', { email: input.email })
+      testFn?.('signin request is already sent')
       throw new TRPCError({
         code: 'BAD_REQUEST',
-        message: 'Email is already sent. Please check your email for verification',
+        message: 'signin request is already sent',
       })
     }
 
-    const created = await prisma.verification.create({
-      data: {
-        type: 'EMAIL_SIGN_IN',
-        token: generateRandomURLString(128),
-        expiresAt: addMinutes(new Date(), 5),
-        to: input.email,
-      },
-    })
+    const created = await createVerification(input.email, 'EMAIL_SIGN_IN')
 
     await sendEmail({
       to: input.email,

@@ -5,5 +5,7 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     globals: true,
+    environment: 'vprisma',
+    setupFiles: ['vitest-environment-vprisma/setup', './src/test/setup.ts'],
   },
 })

@@ -1,8 +1,10 @@
-import { prisma } from '@/lib/prisma'
-import { SESSION_EXPIRATION_SEC } from '@/middlewares/cookie-session'
+import { logger } from '@/lib/logger'
+import { withTransaction } from '@/lib/prisma'
+import { createNewSession } from '@/module/session'
+import { getUserByEmail } from '@/module/user'
+import { addVerificationAttempt, getValidVerification, isAttemptExceeded, useVerification } from '@/module/verification'
 import type { Context } from '@/trpc/trpc'
 import { TRPCError } from '@trpc/server'
-import { addSeconds } from 'date-fns'
 import * as v from 'valibot'
 
 export const signInVerificationSchema = v.object({
@@ -12,6 +14,7 @@ export const signInVerificationSchema = v.object({
 type UseCaseArgs = {
   input: v.InferInput<typeof signInVerificationSchema>
   ctx: Context
+  testFn?: ReturnType<typeof vitest.fn>
 }
 type UseCaseResult =
   | {
@@ -21,82 +24,58 @@ type UseCaseResult =
       ok: false
       attemptExceeded: boolean
     }
-export const signInVerificationUsecase = async ({ ctx, input }: UseCaseArgs): Promise<UseCaseResult> => {
+export const signInVerificationUsecase = async ({ ctx, input, testFn }: UseCaseArgs): Promise<UseCaseResult> => {
   const email = ctx.verificationEmail
   if (!email) {
+    logger.debug('email not found')
+    testFn?.('email not found')
     throw new TRPCError({
       code: 'BAD_REQUEST',
       message: 'Invalid Request',
     })
   }
 
-  const txResult = await prisma.$transaction(async (prisma) => {
-    const verification = await prisma.verification.findUnique({
-      where: {
-        to: email,
-        token: input.token,
-        type: 'EMAIL_SIGN_IN',
-        expiresAt: {
-          gte: new Date(),
-        },
-      },
-    })
+  const txResult = await withTransaction(async () => {
+    const existingUser = await getUserByEmail(email)
 
-    if (!verification) {
+    if (!existingUser) {
+      logger.debug('user not found')
+      testFn?.('user not found')
       return { ok: false }
     }
 
-    const updatedVerification = await prisma.verification.update({
-      where: {
-        id: verification.id,
-      },
-      data: {
-        attempt: {
-          increment: 1,
-        },
-      },
-    })
-    const attemptExceeded = updatedVerification.attempt > 3
-
-    if (attemptExceeded) {
-      return { ok: false, attemptExceeded }
+    const verification = await getValidVerification(email, input.token, 'EMAIL_SIGN_IN')
+    if (!verification) {
+      logger.debug('valid verification not found')
+      testFn?.('valid verification not found')
+      return { ok: false }
     }
 
-    if (verification.usedAt) {
-      return { ok: false, attemptExceeded }
+    const updatedVerification = await addVerificationAttempt(verification.id)
+    const _isAttemptExceeded = isAttemptExceeded(updatedVerification.attempt)
+
+    if (_isAttemptExceeded) {
+      logger.debug('attempt exceeded')
+      testFn?.('attempt exceeded')
+      return { ok: false, attemptExceeded: _isAttemptExceeded }
     }
 
-    await prisma.verification.update({
-      where: {
-        id: verification.id,
-      },
-      data: {
-        usedAt: new Date(),
-      },
-    })
+    await useVerification(updatedVerification.id)
 
-    const createdUser = await prisma.user.findUnique({
-      where: {
-        email: email,
-      },
-    })
+    const createdSession = await createNewSession(existingUser.id)
 
-    if (!createdUser) return { ok: false, attemptExceeded }
-
-    const createdSession = await prisma.session.create({
-      data: {
-        expiresAt: addSeconds(new Date(), SESSION_EXPIRATION_SEC),
-        userId: createdUser.id,
-      },
-    })
-
+    logger.debug('session created')
+    testFn?.('session created')
     return {
       ok: true,
       sessionId: createdSession.id,
     }
   })
 
-  if (!txResult.ok) return { ok: false, attemptExceeded: !!txResult.attemptExceeded }
+  if (!txResult.ok) {
+    logger.debug('txResult not ok')
+    return { ok: false, attemptExceeded: !!txResult.attemptExceeded }
+  }
 
   ctx.setSessionId(txResult.sessionId ?? null)
   ctx.setVerificationEmail(null)
