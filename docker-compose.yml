@@ -7,7 +7,7 @@ services:
     ports:
       - '5455:5432'
     env_file:
-      - .env.local
+      - apps/api-hono/.env.local
     volumes:
       - db:/var/lib/mysql
   db-test:
@@ -17,7 +17,7 @@ services:
     ports:
       - '5456:5432'
     env_file:
-      - .env.test
+      - apps/api-hono/.env.test
     volumes:
       - db-test:/var/lib/postgresql/data
 volumes:
