@@ -11,7 +11,7 @@ const pinoLikeFormat = winston.format.printf(({ level, message, timestamp }) => 
 })
 
 export const logger = winston.createLogger({
-  level: env.APP_ENV === 'test' ? 'debug' : 'info',
+  level: env.APP_ENV === 'local' || env.APP_ENV === 'test' ? 'debug' : 'info',
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(
