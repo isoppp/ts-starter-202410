@@ -22,14 +22,17 @@ export default function Signin() {
   })
 
   const mutation = trpc.auth.signInWithEmail.useMutation({
-    onSuccess: async () => {
-      console.log('success')
+    onSuccess: async (data) => {
+      if (data.ok) {
+        console.log('please check you email!')
+      } else {
+        console.log('something wrong')
+      }
     },
   })
   const onSubmit = useCallback(
     async (values: v.InferInput<typeof schema>) => {
-      mutation.mutate(values)
-      console.log('please check you email!')
+      mutation.mutateAsync(values)
     },
     [mutation],
   )
