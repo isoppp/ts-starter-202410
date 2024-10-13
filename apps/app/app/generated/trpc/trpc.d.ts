@@ -102,7 +102,7 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<{
                 email: string;
             };
             output: {
-                ok: true;
+                ok: boolean;
             };
         }>;
         signInWithEmail: _trpc_server.TRPCMutationProcedure<{

@@ -1,19 +1,10 @@
+import { clientEnv } from '@/lib/env'
 import { trpc } from '@/lib/trpcClient'
-import type { LoaderFunctionArgs } from '@remix-run/cloudflare'
-import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration, json, useLoaderData } from '@remix-run/react'
+import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
 import './tailwind.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { httpBatchLink } from '@trpc/client'
 import type { ReactNode } from 'react'
-
-export const loader = ({ context }: LoaderFunctionArgs) => {
-  return json({
-    ENV: {
-      API_BASE_URL: context.cloudflare.env.API_BASE_URL,
-      APP_ENV: context.cloudflare.env.APP_ENV,
-    },
-  })
-}
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
@@ -49,11 +40,10 @@ export function Layout({ children }: { children: ReactNode }) {
 const queryClient = new QueryClient()
 
 export default function App() {
-  const loaderData = useLoaderData<typeof loader>()
   const trpcClient = trpc.createClient({
     links: [
       httpBatchLink({
-        url: `${loaderData.ENV.API_BASE_URL}/api/trpc`,
+        url: `${clientEnv.API_BASE_URL}/api/trpc`,
         fetch(url, options) {
           return fetch(url, {
             ...options,
