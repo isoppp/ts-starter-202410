@@ -1,5 +1,4 @@
 import { env } from '@/lib/env'
-import { logger } from '@/lib/logger'
 import { renderAsync } from '@react-email/components'
 import type { ReactElement } from 'react'
 async function renderReactEmail(react: ReactElement) {
@@ -37,6 +36,6 @@ export const sendEmail = async ({ react, ...options }: SendEmailOptions) => {
   // TODO send email
   throw Error('Not implemented')
 
-  logger.info('Sent email', { email })
-  return { ok: true }
+  // logger.info('Sent email', { email })
+  // return { ok: true }
 }

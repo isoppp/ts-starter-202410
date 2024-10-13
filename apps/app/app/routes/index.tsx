@@ -83,7 +83,7 @@ export default function Index() {
         <div>{mutation.isPending}</div>
       </div>
 
-      <div className="flex flex-col items-start gap-4 mt-10">
+      <div className="mt-10 flex flex-col items-start gap-4">
         <button type="button" onClick={() => logoutM.mutate()}>
           logout
         </button>

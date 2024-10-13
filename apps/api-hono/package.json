@@ -1,9 +1,7 @@
 {
   "name": "@repo/api-hono",
   "type": "module",
-  "files": [
-    "dist/src"
-  ],
+  "files": ["dist/src"],
   "scripts": {
     "start": "echo $DATABASE_URL && npx prisma migrate deploy && tsx src/index.ts",
     "dev": "dotenv -e .env.local -- tsx watch src/index.ts",
