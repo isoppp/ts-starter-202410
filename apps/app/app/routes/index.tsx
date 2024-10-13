@@ -1,6 +1,9 @@
+import { useToast } from '@/components/ui/Toast/use-toast'
 import { Badge } from '@/components/ui/badge'
+import { handleResponseCode } from '@/lib/handle-response-code'
 import { trpc } from '@/lib/trpcClient'
 import type { MetaFunction } from '@remix-run/cloudflare'
+import { useNavigate } from '@remix-run/react'
 
 export const meta: MetaFunction = () => {
   return [{ title: 'New Remix App' }, { name: 'description', content: 'Welcome to Remix!' }]
@@ -25,6 +28,42 @@ export default function Index() {
     console.log(example)
   }
 
+  const { toast } = useToast()
+
+  const navigate = useNavigate()
+  const logoutM = trpc.auth.logout.useMutation({
+    onSuccess: async () => {
+      await utils.invalidate()
+      toast({
+        type: 'background',
+        title: 'Logout success',
+      })
+      navigate('/login')
+    },
+    onError: (err) => {
+      toast({
+        type: 'background',
+        ...handleResponseCode(err.message),
+      })
+    },
+  })
+  const deleteAccountM = trpc.auth.deleteUser.useMutation({
+    onSuccess: async () => {
+      await utils.invalidate()
+      toast({
+        type: 'background',
+        title: 'Account deleted',
+      })
+      navigate('/login')
+    },
+    onError: (err) => {
+      toast({
+        type: 'background',
+        ...handleResponseCode(err.message),
+      })
+    },
+  })
+
   return (
     <div className="p-4 font-sans">
       <h1 className="text-3xl">Welcome to Remix</h1>
@@ -43,38 +82,15 @@ export default function Index() {
         </button>
         <div>{mutation.isPending}</div>
       </div>
-      <ul className="mt-4 list-disc space-y-2 pl-6">
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/start/quickstart"
-            rel="noreferrer"
-          >
-            5m Quick Start
-          </a>
-        </li>
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/start/tutorial"
-            rel="noreferrer"
-          >
-            30m Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/docs"
-            rel="noreferrer"
-          >
-            Remix Docs
-          </a>
-        </li>
-      </ul>
+
+      <div className="flex flex-col items-start gap-4 mt-10">
+        <button type="button" onClick={() => logoutM.mutate()}>
+          logout
+        </button>
+        <button type="button" onClick={() => deleteAccountM.mutate()}>
+          delete user
+        </button>
+      </div>
     </div>
   )
 }
