@@ -20,7 +20,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <header className="flex items-center gap-4 py-2">
           {[
             { to: '/', children: 'Home' },
-            { to: '/login', children: 'login' },
+            { to: '/login', children: 'Login' },
             { to: '/authenticated-example', children: 'Authenticated' },
           ].map((link) => (
             <Link key={link.to} to={link.to}>
