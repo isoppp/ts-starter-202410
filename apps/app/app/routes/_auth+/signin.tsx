@@ -39,8 +39,8 @@ export default function Signin() {
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
-      <input type='text' {...form.register('email')} />
-      <button type='submit'>submit</button>
+      <input type="text" {...form.register('email')} />
+      <button type="submit">submit</button>
     </form>
   )
 }
