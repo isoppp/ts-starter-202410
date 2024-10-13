@@ -19,7 +19,7 @@ export default defineConfig({
             '.*',
             '**/*.css',
             '**/*.test.{js,jsx,ts,tsx}',
-            '**/__*.*',
+            '**/__*/**/*.*',
             // This is for server-side utilities you want to colocate
             // next to your routes without making an additional
             // directory. If you need a route that includes "server" or
