@@ -291,7 +291,7 @@ export const defineSessionFactory = ((options) => {
 defineSessionFactory.withTransientFields = defaultTransientFieldValues => options => defineSessionFactoryInternal(options, defaultTransientFieldValues);
 function autoGenerateVerificationScalarsOrEnums({ seq }) {
     return {
-        type: "EMAIL_SIGN_UP",
+        type: getScalarFieldValueGenerator().Int({ modelName: "Verification", fieldName: "type", isId: false, isUnique: false, seq }),
         to: getScalarFieldValueGenerator().String({ modelName: "Verification", fieldName: "to", isId: false, isUnique: false, seq }),
         token: getScalarFieldValueGenerator().String({ modelName: "Verification", fieldName: "token", isId: false, isUnique: true, seq }),
         expiresAt: getScalarFieldValueGenerator().DateTime({ modelName: "Verification", fieldName: "expiresAt", isId: false, isUnique: false, seq })

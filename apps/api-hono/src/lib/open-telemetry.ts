@@ -8,7 +8,7 @@ export const initOpenTelemetry = () => {
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     const sdk = new NodeSDK({
       traceExporter: new TraceExporter({
-        keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+        credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS),
       }),
       instrumentations: [new HttpInstrumentation(), new WinstonInstrumentation(), new p.PrismaInstrumentation()],
     })

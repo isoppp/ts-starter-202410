@@ -1,3 +1,5 @@
+import { RESPONSE_CODE } from '@/constants/response-code'
+import { VerificationType } from '@/constants/verification-type'
 import { logger } from '@/lib/logger'
 import { withTransaction } from '@/lib/prisma'
 import { createNewSession } from '@/module/session'
@@ -9,6 +11,7 @@ import * as v from 'valibot'
 
 export const signInVerificationSchema = v.object({
   token: v.pipe(v.string(), v.minLength(1)),
+  email: v.optional(v.nullable(v.pipe(v.string(), v.minLength(1)))),
 })
 
 type UseCaseArgs = {
@@ -16,22 +19,17 @@ type UseCaseArgs = {
   ctx: Context
   testFn?: ReturnType<typeof vitest.fn>
 }
-type UseCaseResult =
-  | {
-      ok: true
-    }
-  | {
-      ok: false
-      attemptExceeded: boolean
-    }
+type UseCaseResult = {
+  ok: true
+}
 export const signInVerificationUsecase = async ({ ctx, input, testFn }: UseCaseArgs): Promise<UseCaseResult> => {
-  const email = ctx.verificationEmail
+  const email = ctx.verificationEmail || input.email
   if (!email) {
-    logger.debug('email not found')
+    logger.info('email not found')
     testFn?.('email not found')
     throw new TRPCError({
       code: 'BAD_REQUEST',
-      message: 'Invalid Request',
+      message: RESPONSE_CODE.R_CANNOT_CONTINUE_VERIFICATION,
     })
   }
 
@@ -39,45 +37,48 @@ export const signInVerificationUsecase = async ({ ctx, input, testFn }: UseCaseA
     const existingUser = await getUserByEmail(email)
 
     if (!existingUser) {
-      logger.debug('user not found')
+      logger.info('user not found')
       testFn?.('user not found')
-      return { ok: false }
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: RESPONSE_CODE.R_CANNOT_CONTINUE_VERIFICATION,
+      })
     }
 
-    const verification = await getValidVerification(email, input.token, 'EMAIL_SIGN_IN')
+    const verification = await getValidVerification(email, input.token, VerificationType.EMAIL_LOGIN)
     if (!verification) {
-      logger.debug('valid verification not found')
+      logger.info('valid verification not found')
       testFn?.('valid verification not found')
-      return { ok: false }
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: RESPONSE_CODE.R_CANNOT_CONTINUE_VERIFICATION,
+      })
     }
 
     const updatedVerification = await addVerificationAttempt(verification.id)
     const _isAttemptExceeded = isAttemptExceeded(updatedVerification.attempt)
 
     if (_isAttemptExceeded) {
-      logger.debug('attempt exceeded')
+      logger.info('attempt exceeded')
       testFn?.('attempt exceeded')
-      return { ok: false, attemptExceeded: _isAttemptExceeded }
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: RESPONSE_CODE.R_CANNOT_CONTINUE_VERIFICATION,
+      })
     }
 
     await useVerification(updatedVerification.id)
 
     const createdSession = await createNewSession(existingUser.id)
 
-    logger.debug('session created')
+    logger.info('session created')
     testFn?.('session created')
     return {
-      ok: true,
       sessionId: createdSession.id,
     }
   })
 
-  if (!txResult.ok) {
-    logger.debug('txResult not ok')
-    return { ok: false, attemptExceeded: !!txResult.attemptExceeded }
-  }
-
-  ctx.setSessionId(txResult.sessionId ?? null)
+  ctx.setSessionId(txResult.sessionId)
   ctx.setVerificationEmail(null)
   return { ok: true }
 }

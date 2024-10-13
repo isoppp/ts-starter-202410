@@ -1,3 +1,5 @@
+import { RESPONSE_CODE } from '@/constants/response-code'
+import { VerificationType } from '@/constants/verification-type'
 import { logger } from '@/lib/logger'
 import { withTransaction } from '@/lib/prisma'
 import { createNewSession } from '@/module/session'
@@ -9,6 +11,7 @@ import * as v from 'valibot'
 
 export const signUpVerificationSchema = v.object({
   token: v.pipe(v.string(), v.minLength(1)),
+  email: v.optional(v.nullable(v.pipe(v.string(), v.minLength(1)))),
 })
 
 type UseCaseArgs = {
@@ -16,27 +19,13 @@ type UseCaseArgs = {
   ctx: Context
   testFn?: ReturnType<typeof vitest.fn>
 }
-type UseCaseResult =
-  | {
-      ok: true
-    }
-  | {
-      ok: false
-      attemptExceeded: boolean
-    }
-type TxResult =
-  | {
-      ok: true
-      sessionId: string
-    }
-  | {
-      ok: false
-      attemptExceeded: boolean
-    }
+type UseCaseResult = {
+  ok: true
+}
 export const signUpVerificationUsecase = async ({ ctx, input, testFn }: UseCaseArgs): Promise<UseCaseResult> => {
-  const email = ctx.verificationEmail
+  const email = ctx.verificationEmail || input.email
   if (!email) {
-    logger.debug('email not found')
+    logger.info('email not found')
     testFn?.('email not found')
 
     throw new TRPCError({
@@ -45,28 +34,36 @@ export const signUpVerificationUsecase = async ({ ctx, input, testFn }: UseCaseA
     })
   }
 
-  const txResult = await withTransaction(async (): Promise<TxResult> => {
+  const txResult = await withTransaction(async () => {
     const existing = await getUserByEmail(email)
     if (existing) {
-      logger.debug('user already exists')
+      logger.info('user already exists')
       testFn?.('user already exists')
-      return { ok: false, attemptExceeded: false }
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: RESPONSE_CODE.R_CANNOT_CONTINUE_VERIFICATION,
+      })
     }
 
-    const verification = await getValidVerification(email, input.token, 'EMAIL_SIGN_UP')
+    const verification = await getValidVerification(email, input.token, VerificationType.EMAIL_USER_REGISTRATION)
 
     if (!verification) {
-      logger.debug('valid verification not found')
+      logger.info('valid verification not found')
       testFn?.('valid verification not found')
-      return { ok: false, attemptExceeded: false }
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: RESPONSE_CODE.R_CANNOT_CONTINUE_VERIFICATION,
+      })
     }
 
     const updatedVerification = await addVerificationAttempt(verification.id)
-    const _isAttemptExceeded = isAttemptExceeded(updatedVerification.attempt)
     if (isAttemptExceeded(updatedVerification.attempt)) {
-      logger.debug('attempt exceeded')
+      logger.info('attempt exceeded')
       testFn?.('attempt exceeded')
-      return { ok: false, attemptExceeded: _isAttemptExceeded }
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: RESPONSE_CODE.R_CANNOT_CONTINUE_VERIFICATION,
+      })
     }
 
     await useVerification(updatedVerification.id)
@@ -74,20 +71,15 @@ export const signUpVerificationUsecase = async ({ ctx, input, testFn }: UseCaseA
     const createdUser = await createUserByEmail(verification.to)
     const createdSession = await createNewSession(createdUser.id)
 
-    logger.debug('session and user created')
+    logger.info('session and user created')
     testFn?.('session and user created')
+
     return {
-      ok: true,
       sessionId: createdSession.id,
     }
   })
 
-  if (!txResult.ok) {
-    logger.debug('txResult not ok')
-    return txResult
-  }
-
-  ctx.setSessionId(txResult.sessionId ?? null)
+  ctx.setSessionId(txResult.sessionId)
   ctx.setVerificationEmail(null)
   return { ok: true }
 }

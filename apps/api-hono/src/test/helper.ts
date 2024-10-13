@@ -1,3 +1,4 @@
+import { defineUserFactory } from '@/generated/fabbrica'
 import type { Context } from '@/trpc/trpc'
 import { vitest } from 'vitest'
 
@@ -15,3 +16,5 @@ export const createTestCtx = (ctx: Partial<Context> = {}): Context => {
     ...(ctx ?? {}),
   }
 }
+
+export const testUserFactory = defineUserFactory({ defaultData: { email: testEmail } })

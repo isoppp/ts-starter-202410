@@ -1,6 +1,3 @@
--- CreateEnum
-CREATE TYPE "VerificationType" AS ENUM ('EMAIL_SIGN_UP', 'EMAIL_SIGN_IN');
-
 -- CreateTable
 CREATE TABLE "Example" (
     "id" TEXT NOT NULL,
@@ -33,7 +30,7 @@ CREATE TABLE "Session" (
 -- CreateTable
 CREATE TABLE "Verification" (
     "id" TEXT NOT NULL,
-    "type" "VerificationType" NOT NULL,
+    "type" INTEGER NOT NULL,
     "to" TEXT NOT NULL,
     "token" VARCHAR(128) NOT NULL,
     "expiresAt" TIMESTAMP(3) NOT NULL,
