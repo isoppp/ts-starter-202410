@@ -1,5 +1,8 @@
 import { RESPONSE_CODE } from '@/constants/response-code'
 import { VerificationType } from '@/constants/verification-type'
+import { sendEmail } from '@/infrastructure/email/sendEmail'
+import { LoginVerificationEmail } from '@/infrastructure/email/templates/LoginVerificationEmail'
+import { SignUpVerificationEmail } from '@/infrastructure/email/templates/SignUpVerificationEmail'
 import { logger } from '@/lib/logger'
 import { withTransaction } from '@/lib/prisma'
 import { getUserByEmail } from '@/module/user'
@@ -36,12 +39,11 @@ export const loginOrRegisterWithEmail = async ({ ctx, input, testFn }: UseCaseAr
 
       const created = await createVerification(input.email, VerificationType.EMAIL_USER_REGISTRATION)
 
-      // TODO send email
-      // await sendEmail({
-      //   to: input.email,
-      //   subject: 'Secure link to create an account to ts-starter.app',
-      //   react: <SignUpVerificationEmail pathname={`/signup/verification/${created.token}`} />,
-      // })
+      await sendEmail({
+        to: input.email,
+        subject: 'Secure link to create an account to ts-starter.app',
+        react: <SignUpVerificationEmail pathname={`/signup/verification/${created.token}`} />,
+      })
       logger.info('sent sign up email', { email: input.email })
       testFn?.('sent sign up email')
     } else {
@@ -59,12 +61,11 @@ export const loginOrRegisterWithEmail = async ({ ctx, input, testFn }: UseCaseAr
 
       const created = await createVerification(input.email, VerificationType.EMAIL_LOGIN)
 
-      // TODO send email
-      // await sendEmail({
-      //   to: input.email,
-      //   subject: 'Secure link to log in to ts-starter.app',
-      //   react: <LoginVerificationEmail pathname={`/login/verification/${created.token}`} />,
-      // })
+      await sendEmail({
+        to: input.email,
+        subject: 'Secure link to log in to ts-starter.app',
+        react: <LoginVerificationEmail pathname={`/login/verification/${created.token}`} />,
+      })
       logger.info('sent login email', { email: input.email })
       testFn?.('sent login email')
     }

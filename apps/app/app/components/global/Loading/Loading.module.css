@@ -1,0 +1,16 @@
+/* https://10015.io/tools/css-loader-generator */
+@keyframes spinner-c7wet2 {
+  100% {
+    transform: rotate(1turn);
+  }
+}
+
+.spinner {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(farthest-side, hsl(var(--primary)) 94%, #0000) top / 9px 9px no-repeat,
+    conic-gradient(#0000 35%, hsl(var(--primary)));
+  -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 7px), #000 0);
+  animation: spinner-c7wet2 0.9s infinite linear;
+}

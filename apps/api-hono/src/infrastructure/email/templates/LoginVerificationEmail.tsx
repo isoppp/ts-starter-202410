@@ -3,7 +3,7 @@ import { generateRandomURLString } from '@/utils/auth'
 import { Body, Button, Container, Head, Heading, Html, Img, Row, Section, Text } from '@react-email/components'
 
 const baseUrl = env.WEBAPP_URL
-const serviceName = 'titochat'
+const serviceName = 'ts-starter'
 
 type Props = {
   pathname: string
@@ -22,7 +22,7 @@ export const LoginVerificationEmail = ({ pathname = `/login/${generateRandomURLS
             <Section align='center' style={{ width: '240px' }}>
               <Row>
                 <Button style={button} href={href}>
-                  Login to titochat.app
+                  Login to ts-starter
                 </Button>
               </Row>
             </Section>

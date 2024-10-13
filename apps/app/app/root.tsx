@@ -2,6 +2,7 @@ import { clientEnv } from '@/lib/env'
 import { trpc } from '@/lib/trpcClient'
 import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
 import './tailwind.css'
+import { Toaster } from '@/components/ui/Toast/toaster'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { httpBatchLink } from '@trpc/client'
 import type { ReactNode } from 'react'
@@ -19,9 +20,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <header className="flex items-center gap-4 py-2">
           {[
             { to: '/', children: 'Home' },
-            { to: '/signup', children: 'Signup' },
-            { to: '/signin', children: 'Signin' },
-            { to: '/signout', children: 'Signout' },
+            { to: '/login', children: 'login' },
             { to: '/authenticated-example', children: 'Authenticated' },
           ].map((link) => (
             <Link key={link.to} to={link.to}>
@@ -30,6 +29,7 @@ export function Layout({ children }: { children: ReactNode }) {
           ))}
         </header>
         {children}
+        <Toaster />
         <ScrollRestoration />
         <Scripts />
       </body>

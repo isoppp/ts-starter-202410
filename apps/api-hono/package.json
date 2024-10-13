@@ -1,7 +1,9 @@
 {
   "name": "@repo/api-hono",
   "type": "module",
-  "files": ["dist/src"],
+  "files": [
+    "dist/src"
+  ],
   "scripts": {
     "start": "echo $DATABASE_URL && npx prisma migrate deploy && tsx src/index.ts",
     "dev": "dotenv -e .env.local -- tsx watch src/index.ts",
@@ -30,6 +32,7 @@
     "@opentelemetry/sdk-node": "0.53.0",
     "@prisma/client": "5.20.0",
     "@prisma/instrumentation": "5.20.0",
+    "@quramy/prisma-fabbrica": "2.2.1",
     "@react-email/components": "0.0.25",
     "@trpc/server": "11.0.0-rc.569",
     "chalk": "5.3.0",
@@ -41,10 +44,9 @@
     "react": "18.3.1",
     "react-email": "3.0.1",
     "tsx": "4.19.1",
+    "typescript": "5.6.3",
     "valibot": "0.42.1",
     "winston": "3.15.0",
-    "@quramy/prisma-fabbrica": "2.2.1",
-    "typescript": "5.6.3",
     "wretch": "2.10.0"
   },
   "devDependencies": {
