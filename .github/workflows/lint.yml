@@ -16,7 +16,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: mydb
+          POSTGRES_DB: ts-starter
         ports:
           - 5456:5432
         options: >-
