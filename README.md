@@ -1,4 +1,6 @@
-# Remix Starter
+# ts-starter-202410
+
+My fullstack typescript starter with Remix and hono.
 
 ## Features
 

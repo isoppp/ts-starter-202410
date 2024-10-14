@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
 
 // Encrypt using AES-256-GCM
-function encrypt(text: string, secret: string): string {
+export function encrypt(text: string, secret: string): string {
   const key = crypto.scryptSync(secret, 'salt', 32)
   const iv = crypto.randomBytes(12) // 12 bytes IV is recommended for GCM mode
   const cipher = crypto.createCipheriv('aes-256-gcm', key, iv)
@@ -12,7 +12,7 @@ function encrypt(text: string, secret: string): string {
 }
 
 // Decrypt using AES-256-GCM
-function decrypt(text: string, secret: string): string {
+export function decrypt(text: string, secret: string): string {
   if (!text || typeof text !== 'string') {
     throw new TypeError('Invalid encrypted text provided')
   }

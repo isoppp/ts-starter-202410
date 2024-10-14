@@ -1,25 +1,29 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "ui": "tui",
-  "globalDependencies": ["**/.env.*local"],
+  "globalDependencies": ["**/.env*"],
   "tasks": {
+    "export-type": {
+      "dependsOn": ["^export-type"],
+      "cache": false
+    },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["export-type"],
+      "cache": false
     },
     "lint-fix": {
-      "dependsOn": ["^lint-fix"]
+      "dependsOn": ["export-type"],
+      "cache": false
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": ["export-type"],
+      "cache": false
     },
     "test": {
-      "dependsOn": ["^test"]
-    },
-    "lint-staged": {
-      "dependsOn": ["^lint-staged"],
+      "dependsOn": ["export-type"],
       "cache": false
     },
     "dev": {
+      "dependsOn": ["export-type"],
       "cache": false,
       "persistent": true
     }

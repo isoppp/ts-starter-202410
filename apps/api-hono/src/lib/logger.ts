@@ -11,7 +11,7 @@ const pinoLikeFormat = winston.format.printf(({ level, message, timestamp }) => 
 })
 
 export const logger = winston.createLogger({
-  level: env.APP_ENV === 'test' ? 'debug' : 'info',
+  level: env.APP_ENV === 'local' || env.APP_ENV === 'test' ? 'debug' : 'info',
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(
@@ -26,7 +26,7 @@ export const logger = winston.createLogger({
     }),
     process.env.GOOGLE_APPLICATION_CREDENTIALS
       ? new LoggingWinston({
-          keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+          credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS),
         })
       : null,
   ].filter((v) => !!v),

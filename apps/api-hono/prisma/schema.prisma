@@ -48,19 +48,14 @@ model Session {
   @@index([userId])
 }
 
-enum VerificationType {
-  EMAIL_SIGN_UP
-  EMAIL_SIGN_IN
-}
-
 model Verification {
-  id        String           @id @default(cuid())
-  type      VerificationType
+  id        String    @id @default(cuid())
+  type      Int
   to        String
-  token     String           @unique @db.VarChar(128)
+  token     String    @unique @db.VarChar(128)
   expiresAt DateTime
   usedAt    DateTime?
-  attempt   Int              @default(0)
+  attempt   Int       @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

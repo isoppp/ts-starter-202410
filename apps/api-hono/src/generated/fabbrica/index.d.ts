@@ -2,7 +2,6 @@ import type { Example } from "@prisma/client";
 import type { User } from "@prisma/client";
 import type { Session } from "@prisma/client";
 import type { Verification } from "@prisma/client";
-import type { VerificationType } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
 import type { Resolver } from "@quramy/prisma-fabbrica/lib/internal";
 export { resetSequence, registerScalarFieldValueGenerator, resetScalarFieldValueGenerator } from "@quramy/prisma-fabbrica/lib/internal";
@@ -151,7 +150,7 @@ interface SessionFactoryBuilder {
 export declare const defineSessionFactory: SessionFactoryBuilder;
 type VerificationFactoryDefineInput = {
     id?: string;
-    type?: VerificationType;
+    type?: number;
     to?: string;
     token?: string;
     expiresAt?: Date;

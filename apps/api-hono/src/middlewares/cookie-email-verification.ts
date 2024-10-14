@@ -15,7 +15,7 @@ export const parseVerification = (c: Context<EnvHono>): { hasCookie: boolean; ve
   if (!sessionCookie) return { hasCookie, verificationEmail: null }
 
   try {
-    const unsignedSessionId = unsign<string>(sessionCookie, env.SESSION_SECRET)
+    const unsignedSessionId = unsign<string>(sessionCookie, env.APP_SECRET)
     return { hasCookie, verificationEmail: unsignedSessionId }
   } catch (e) {
     logger.error('Failed to unsign verification cookie:', e)
@@ -32,12 +32,14 @@ export const cookieEmailVerification = factory.createMiddleware(async (c, next) 
   const newValue = c.get('verificationEmail')
 
   if (hasCookie && !newValue) {
-    deleteCookie(c, cookieName)
+    deleteCookie(c, cookieName, {
+      secure: env.APP_ENV !== 'local',
+    })
     return
   }
 
   if (newValue !== verificationEmail) {
-    const newSessionCookie = sign(newValue, env.SESSION_SECRET)
+    const newSessionCookie = sign(newValue, env.APP_SECRET)
     setCookie(c, cookieName, newSessionCookie, {
       httpOnly: true,
       secure: env.APP_ENV !== 'local',

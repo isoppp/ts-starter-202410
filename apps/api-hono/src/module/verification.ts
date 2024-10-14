@@ -1,6 +1,6 @@
+import type { VerificationType } from '@/constants/verification-type'
 import { getPrisma } from '@/lib/prisma'
 import { generateRandomURLString } from '@/utils/auth'
-import type { VerificationType } from '@prisma/client'
 import { addMinutes } from 'date-fns'
 
 export const getRecentUnusedVerification = async (email: string, type: VerificationType) => {
