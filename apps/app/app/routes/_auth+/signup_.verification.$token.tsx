@@ -9,6 +9,7 @@ import { trpc } from '@/lib/trpcClient'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import type { MetaFunction } from '@remix-run/cloudflare'
 import { Link, useNavigate, useParams } from '@remix-run/react'
+import { serviceName } from '@repo/api-hono/src/config/app'
 import { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as v from 'valibot'
@@ -75,7 +76,7 @@ export default function VerificationToken() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Link to="/">
-              <img src="/logo-icon.svg" alt="ts-starter" className="h-6" />
+              <img src="/logo-icon.svg" alt={serviceName} className="h-6" />
             </Link>
             <CardTitle className="text-2xl">Verification</CardTitle>
           </div>

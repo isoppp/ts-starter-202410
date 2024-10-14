@@ -1,3 +1,4 @@
+import { serviceDomain } from '@/config/app'
 import { env } from '@/lib/env'
 import { renderAsync } from '@react-email/components'
 import type { ReactElement } from 'react'
@@ -12,7 +13,7 @@ type SendEmailOptions = {
 } & ({ html: string; text: string; react?: never } | { react: ReactElement; html?: never; text?: never })
 
 export const sendEmail = async ({ react, ...options }: SendEmailOptions) => {
-  const from = 'noreply@ts-starter'
+  const from = `noreply@${serviceDomain}`
 
   const email = {
     from,

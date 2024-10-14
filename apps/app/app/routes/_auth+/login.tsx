@@ -9,6 +9,7 @@ import { trpc } from '@/lib/trpcClient'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import type { MetaFunction } from '@remix-run/cloudflare'
 import { Link } from '@remix-run/react'
+import { serviceName } from '@repo/api-hono/src/config/app'
 import { IconSend } from '@tabler/icons-react'
 import { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -89,7 +90,7 @@ export default function SignInPage() {
                 LOGO HERE
               </Link>
             </div>
-            <CardDescription className="mt-3">Enter your email below to start using ts-starter.</CardDescription>
+            <CardDescription className="mt-3">Enter your email below to start using {serviceName}.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={form.handleSubmit(onSubmit)}>

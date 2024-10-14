@@ -1,3 +1,4 @@
+import { serviceDomain } from '@/config/app'
 import { RESPONSE_CODE } from '@/constants/response-code'
 import { VerificationType } from '@/constants/verification-type'
 import { sendEmail } from '@/infrastructure/email/sendEmail'
@@ -41,7 +42,7 @@ export const loginOrRegisterWithEmail = async ({ ctx, input, testFn }: UseCaseAr
 
       await sendEmail({
         to: input.email,
-        subject: 'Secure link to create an account to ts-starter.app',
+        subject: `Secure link to create an account to ${serviceDomain}`,
         react: <SignUpVerificationEmail pathname={`/signup/verification/${created.token}`} />,
       })
       logger.info('sent sign up email', { email: input.email })
@@ -63,7 +64,7 @@ export const loginOrRegisterWithEmail = async ({ ctx, input, testFn }: UseCaseAr
 
       await sendEmail({
         to: input.email,
-        subject: 'Secure link to log in to ts-starter.app',
+        subject: `Secure link to log in to ${serviceDomain}`,
         react: <LoginVerificationEmail pathname={`/login/verification/${created.token}`} />,
       })
       logger.info('sent login email', { email: input.email })
