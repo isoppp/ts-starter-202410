@@ -17,7 +17,7 @@
     "turbo": "latest",
     "typescript": "5.6.3"
   },
-  "packageManager": "pnpm@9.12.1",
+  "packageManager": "pnpm@9.12.2",
   "engines": {
     "node": ">=20"
   },
@@ -25,6 +25,6 @@
     "pre-push": "pnpm typecheck"
   },
   "dependencies": {
-    "@biomejs/biome": "1.9.3"
+    "@biomejs/biome": "1.9.4"
   }
 }
