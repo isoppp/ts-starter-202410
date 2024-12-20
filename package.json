@@ -12,12 +12,12 @@
     "test": "turbo test"
   },
   "devDependencies": {
-    "prettier": "3.3.3",
+    "prettier": "3.4.2",
     "simple-git-hooks": "2.11.1",
     "turbo": "latest",
     "typescript": "5.7.2"
   },
-  "packageManager": "pnpm@9.14.2",
+  "packageManager": "pnpm@9.15.1",
   "engines": {
     "node": ">=20"
   },
